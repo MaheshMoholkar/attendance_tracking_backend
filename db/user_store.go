@@ -13,7 +13,7 @@ const userColl = "users"
 
 type UserStore interface {
 	GetUserByEmail(context.Context, string) (string, error)
-	PostUser(context.Context, *types.User) (*types.User, error)
+	CreateUser(context.Context, *types.User) (*types.User, error)
 }
 
 type MongoUserStore struct {
@@ -36,7 +36,7 @@ func (s *MongoUserStore) GetUserByEmail(ctx context.Context, email string) (stri
 	return user.ID.Hex(), nil
 }
 
-func (s *MongoUserStore) PostUser(ctx context.Context, user *types.User) (*types.User, error) {
+func (s *MongoUserStore) CreateUser(ctx context.Context, user *types.User) (*types.User, error) {
 	cursor, err := s.coll.InsertOne(ctx, user)
 	if err != nil {
 		return nil, err

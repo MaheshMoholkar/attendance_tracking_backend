@@ -1,8 +1,6 @@
 package api
 
 import (
-	"log"
-
 	"github.com/MaheshMoholkar/attendance_tracking_backend/db"
 	"github.com/MaheshMoholkar/attendance_tracking_backend/types"
 	"github.com/gofiber/fiber/v2"
@@ -18,7 +16,7 @@ func NewUserHandler(userStore db.UserStore) *UserHandler {
 	}
 }
 
-func (h *UserHandler) HandlePostUser(ctx *fiber.Ctx) error {
+func (h *UserHandler) HandleCreateUser(ctx *fiber.Ctx) error {
 	var params types.PostUserParams
 	if err := ctx.BodyParser(&params); err != nil {
 		return nil
@@ -30,10 +28,9 @@ func (h *UserHandler) HandlePostUser(ctx *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	insertedUser, err := h.userStore.PostUser(ctx.Context(), user)
+	insertedUser, err := h.userStore.CreateUser(ctx.Context(), user)
 	if err != nil {
 		return err
 	}
-	log.Print(insertedUser)
 	return ctx.JSON(insertedUser)
 }

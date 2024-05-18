@@ -2,17 +2,9 @@ package types
 
 import (
 	"fmt"
-	"regexp"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
-)
-
-const (
-	bcryptCost   = 12
-	minFirstName = 2
-	minLastName  = 2
-	minPassword  = 6
 )
 
 type User struct {
@@ -45,11 +37,6 @@ func (params PostUserParams) Validate() map[string]string {
 		errors["email"] = "email is invalid"
 	}
 	return errors
-}
-
-func isEmailValid(e string) bool {
-	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z]+\.[a-z]{2,4}$`)
-	return emailRegex.MatchString(e)
 }
 
 func NewUserFromParams(params PostUserParams) (*User, error) {
