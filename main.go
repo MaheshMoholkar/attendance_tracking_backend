@@ -35,21 +35,26 @@ func main() {
 		apiv1 = app.Group("/api/v1")
 
 		//initialize stores
-		userStore = db.NewMongoUserStore(client)
-		_         = &db.Store{
+		userStore    = db.NewMongoUserStore(client)
+		studentStore = db.NewMongoStudentStore(client)
+		_            = &db.Store{
 			UserStore: userStore,
 		}
+
 		// initialize handlers
-		authHandler = api.NewAuthHandler(userStore)
-		userHandler = api.NewUserHandler(userStore)
+		authHandler    = api.NewAuthHandler(userStore)
+		userHandler    = api.NewUserHandler(userStore)
+		studentHandler = api.NewStudentHandler(studentStore)
 	)
 
 	// middlewares
 	apiv1.Use(middleware.VerifyToken())
 
 	// auth handlers
-	app.Post("/api/auth/register", userHandler.HandlePostUser)
+	app.Post("/api/auth/register", userHandler.HandleCreateUser)
 	app.Post("/api/auth/login", authHandler.HandleLogin)
+
+	apiv1.Post("student", studentHandler.HandleCreateStudent)
 
 	app.Listen(*listenAddr)
 }

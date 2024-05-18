@@ -16,7 +16,7 @@ func NewStudentHandler(studentStore db.StudentStore) *StudentHandler {
 	}
 }
 
-func (h *StudentHandler) HandlerCreateStudent(ctx *fiber.Ctx) error {
+func (h *StudentHandler) HandleCreateStudent(ctx *fiber.Ctx) error {
 	var params types.PostStudentParams
 	if err := ctx.BodyParser(&params); err != nil {
 		return err
