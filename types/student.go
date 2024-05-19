@@ -34,10 +34,10 @@ func (params PostStudentParams) Validate() map[string]string {
 	if !isEmailValid(params.Email) {
 		errors["email"] = "email is invalid"
 	}
-	if len(params.Class) != 0 {
+	if len(params.Class) == 0 {
 		errors["class"] = "class is needed"
 	}
-	if len(params.Division) != 0 {
+	if len(params.Division) == 0 {
 		errors["division"] = "division is needed"
 	}
 	return errors
