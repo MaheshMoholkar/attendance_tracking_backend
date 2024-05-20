@@ -30,6 +30,11 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Verify the connection
+	if err := client.Ping(context.TODO(), nil); err != nil {
+		log.Fatalf("Failed to ping MongoDB: %v", err)
+	}
+
 	var (
 		app   = fiber.New(config)
 		apiv1 = app.Group("/api/v1")
@@ -64,6 +69,7 @@ func main() {
 	app.Post("/api/auth/register", userHandler.HandleCreateUser)
 	app.Post("/api/auth/login", authHandler.HandleLogin)
 
+	apiv1.Get("/students", studentHandler.HandleGetStudents)
 	apiv1.Post("/student", studentHandler.HandleCreateStudent)
 
 	app.Listen(*listenAddr)
