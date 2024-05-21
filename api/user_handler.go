@@ -19,7 +19,7 @@ func NewUserHandler(userStore db.UserStore) *UserHandler {
 func (h *UserHandler) HandleCreateUser(ctx *fiber.Ctx) error {
 	var params types.PostUserParams
 	if err := ctx.BodyParser(&params); err != nil {
-		return nil
+		return err
 	}
 	if errors := params.Validate(); len(errors) > 0 {
 		return ctx.JSON(errors)
