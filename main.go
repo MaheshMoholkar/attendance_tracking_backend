@@ -75,6 +75,7 @@ func main() {
 
 	// user handlers
 	apiv1.Get("/classes", collegeHandler.HandleGetClasses)
+	apiv1.Post("/class", collegeHandler.HandlePostClass)
 
 	// student handlers
 	apiv1.Get("/students", studentHandler.HandleGetStudents)

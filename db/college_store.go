@@ -5,6 +5,7 @@ import (
 
 	"github.com/MaheshMoholkar/attendance_tracking_backend/types"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -12,6 +13,7 @@ const collegeColl = "college"
 
 type CollegeStore interface {
 	GetClasses(ctx context.Context, filter bson.M) ([]*types.Class, error)
+	PostClass(ctx context.Context, class *types.Class) (*types.Class, error)
 }
 
 type MongoCollegeStore struct {
@@ -37,4 +39,13 @@ func (s *MongoCollegeStore) GetClasses(ctx context.Context, filter bson.M) ([]*t
 	}
 	return classes, nil
 
+}
+
+func (s *MongoCollegeStore) PostClass(ctx context.Context, class *types.Class) (*types.Class, error) {
+	cursor, err := s.coll.InsertOne(ctx, class)
+	if err != nil {
+		return nil, err
+	}
+	class.ID = cursor.InsertedID.(primitive.ObjectID)
+	return class, nil
 }
