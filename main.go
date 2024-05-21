@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/MaheshMoholkar/attendance_tracking_backend/api"
+	"github.com/MaheshMoholkar/attendance_tracking_backend/api/middleware"
 	"github.com/MaheshMoholkar/attendance_tracking_backend/db"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -69,6 +70,7 @@ func main() {
 
 	// middlewares
 	//apiv1.Use(middleware.VerifyToken())
+	apiv1.Use(middleware.Logger)
 
 	// auth handlers
 	app.Post("/api/auth/register", userHandler.HandleCreateUser)
@@ -81,6 +83,7 @@ func main() {
 	// student handlers
 	apiv1.Get("/students", studentHandler.HandleGetStudents)
 	apiv1.Post("/student", studentHandler.HandleCreateStudent)
+	apiv1.Delete("/student", studentHandler.HandleDeleteStudent)
 
 	// attendance handlers
 	apiv1.Get("/attendance", attendanceHandler.HandleGetAttendance)

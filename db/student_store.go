@@ -14,6 +14,7 @@ const studentColl = "students"
 type StudentStore interface {
 	GetStudents(ctx context.Context, filter bson.M) ([]*types.Student, error)
 	PostStudent(ctx context.Context, student *types.Student) (*types.Student, error)
+	DeleteStudent(ctx context.Context, filter bson.M) error
 }
 
 type MongoStudentStore struct {
@@ -48,4 +49,12 @@ func (s *MongoStudentStore) PostStudent(ctx context.Context, student *types.Stud
 	}
 	student.ID = cursor.InsertedID.(primitive.ObjectID)
 	return student, nil
+}
+
+func (s *MongoStudentStore) DeleteStudent(ctx context.Context, filter bson.M) error {
+	_, err := s.coll.DeleteOne(ctx, filter)
+	if err != nil {
+		return err
+	}
+	return nil
 }

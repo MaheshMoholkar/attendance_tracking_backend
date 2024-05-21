@@ -1,6 +1,9 @@
 package api
 
 import (
+	"log"
+	"strconv"
+
 	"github.com/MaheshMoholkar/attendance_tracking_backend/db"
 	"github.com/MaheshMoholkar/attendance_tracking_backend/types"
 	"github.com/gofiber/fiber/v2"
@@ -71,4 +74,29 @@ func (h *StudentHandler) HandleCreateStudent(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.JSON(insertedStudent)
+}
+
+func (h *StudentHandler) HandleDeleteStudent(ctx *fiber.Ctx) error {
+	rollnoStr := ctx.Query("rollno")
+	if rollnoStr == "" {
+		log.Println("Rollno parameter is required")
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Rollno parameter is required",
+		})
+	}
+
+	rollno, err := strconv.Atoi(rollnoStr)
+	if err != nil {
+		log.Printf("Invalid rollno parameter: %v", err)
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid rollno parameter",
+		})
+	}
+	filter := bson.M{"rollno": rollno}
+	err = h.Store.StudentStore.DeleteStudent(ctx.Context(), filter)
+	if err != nil {
+		return err
+	}
+	return nil
+
 }
