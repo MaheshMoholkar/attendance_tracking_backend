@@ -33,6 +33,7 @@ func (s *MongoAttendanceStore) GetAttendance(ctx context.Context, filter bson.M)
 	if err != nil {
 		return nil, err
 	}
+	defer cursor.Close(ctx)
 	var attendance []*types.Attendance
 	if err := cursor.All(ctx, &attendance); err != nil {
 		return nil, err

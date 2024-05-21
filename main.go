@@ -44,14 +44,15 @@ func main() {
 		studentStore    = db.NewMongoStudentStore(client)
 		attendanceStore = db.NewMongoAttendanceStore(client)
 		collegeStore    = db.NewMongoCollegeStore(client)
-		_               = &db.Store{
-			UserStore: userStore,
+		store           = &db.Store{
+			StudentStore: studentStore,
+			CollegeStore: collegeStore,
 		}
 
 		// initialize handlers
 		authHandler       = api.NewAuthHandler(userStore)
 		userHandler       = api.NewUserHandler(userStore)
-		studentHandler    = api.NewStudentHandler(studentStore)
+		studentHandler    = api.NewStudentHandler(store)
 		attendanceHandler = api.NewAttendanceHandler(attendanceStore)
 		collegeHandler    = api.NewCollegeHandler(collegeStore)
 	)
@@ -74,7 +75,7 @@ func main() {
 	app.Post("/api/auth/login", authHandler.HandleLogin)
 
 	// user handlers
-	apiv1.Get("/classes", collegeHandler.HandleGetClasses)
+	apiv1.Get("/class-info", collegeHandler.HandleGetClassInfo)
 	apiv1.Post("/class", collegeHandler.HandlePostClass)
 
 	// student handlers

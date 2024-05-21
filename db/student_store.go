@@ -33,6 +33,7 @@ func (s *MongoStudentStore) GetStudents(ctx context.Context, filter bson.M) ([]*
 	if err != nil {
 		return nil, err
 	}
+	defer cursor.Close(ctx)
 	var students []*types.Student
 	if err := cursor.All(ctx, &students); err != nil {
 		return nil, err

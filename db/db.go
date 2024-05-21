@@ -6,7 +6,6 @@ const (
 )
 
 type Store struct {
-	UserStore
-	//StudentStore
-	//AttendanceStore
+	StudentStore
+	CollegeStore
 }

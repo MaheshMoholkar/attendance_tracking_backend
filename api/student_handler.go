@@ -12,12 +12,12 @@ type StudentQueryParams struct {
 }
 
 type StudentHandler struct {
-	StudentStore db.StudentStore
+	Store *db.Store
 }
 
-func NewStudentHandler(studentStore db.StudentStore) *StudentHandler {
+func NewStudentHandler(store *db.Store) *StudentHandler {
 	return &StudentHandler{
-		StudentStore: studentStore,
+		Store: store,
 	}
 }
 
@@ -30,7 +30,7 @@ func (h *StudentHandler) HandleGetStudents(ctx *fiber.Ctx) error {
 	if qparams.rollno != 0 {
 		filter = bson.M{"rollno": qparams.rollno}
 	}
-	students, err := h.StudentStore.GetStudents(ctx.Context(), filter)
+	students, err := h.Store.StudentStore.GetStudents(ctx.Context(), filter)
 	if err != nil {
 		return err
 	}
@@ -49,9 +49,26 @@ func (h *StudentHandler) HandleCreateStudent(ctx *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	insertedStudent, err := h.StudentStore.PostStudent(ctx.Context(), student)
+	insertedStudent, err := h.Store.StudentStore.PostStudent(ctx.Context(), student)
 	if err != nil {
 		return err
 	}
+	// Retrieve the class based on className
+	filter := bson.M{"className": params.ClassName}
+	class, err := h.Store.CollegeStore.GetClassByName(ctx.Context(), filter)
+	if err != nil {
+		return err
+	}
+
+	// Add the student ID to the division
+	class.Divisions[params.Division] = append(class.Divisions[params.Division], insertedStudent.ID)
+
+	// Update the class document in the database
+	update := bson.M{"$set": bson.M{"divisions": class.Divisions}}
+	_, err = h.Store.CollegeStore.UpdateClass(ctx.Context(), filter, update)
+	if err != nil {
+		return err
+	}
+
 	return ctx.JSON(insertedStudent)
 }

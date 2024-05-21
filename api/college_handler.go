@@ -21,7 +21,23 @@ func NewCollegeHandler(collegeStore db.CollegeStore) *CollegeHandler {
 	}
 }
 
-func (h *CollegeHandler) HandleGetClasses(ctx *fiber.Ctx) error {
+func (h *CollegeHandler) HandleGetClassInfo(ctx *fiber.Ctx) error {
+	var qparams ClassQueryParams
+	if err := ctx.QueryParser(&qparams); err != nil {
+		return err
+	}
+
+	filter := bson.M{}
+
+	classInfos, err := h.CollegeStore.GetClassInfo(ctx.Context(), filter)
+	if err != nil {
+		return err
+	}
+
+	return ctx.JSON(classInfos)
+}
+
+func (h *CollegeHandler) HandleGetClass(ctx *fiber.Ctx) error {
 	var qparams ClassQueryParams
 	if err := ctx.QueryParser(&qparams); err != nil {
 		return err
@@ -31,7 +47,11 @@ func (h *CollegeHandler) HandleGetClasses(ctx *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	return ctx.JSON(classes)
+	classNames := make([]string, len(classes))
+	for i, class := range classes {
+		classNames[i] = class.ClassName
+	}
+	return ctx.JSON(classNames)
 
 }
 

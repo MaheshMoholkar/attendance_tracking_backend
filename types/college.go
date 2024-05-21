@@ -13,6 +13,11 @@ type Class struct {
 	Divisions map[string][]primitive.ObjectID `bson:"divisions" json:"divisions"`
 }
 
+type ClassInfo struct {
+	ClassName string          `json:"className"`
+	Divisions map[string]bool `json:"divisions"`
+}
+
 type PostClassParams struct {
 	Year      int                             `json:"year"`
 	ClassName string                          `json:"className"`
