@@ -7,7 +7,7 @@ const (
 	minFirstName  = 2
 	minLastName   = 2
 	minPassword   = 6
-	minClass      = 2
+	minClassName  = 2
 	exactDivision = 1
 )
 

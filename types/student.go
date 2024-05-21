@@ -12,7 +12,7 @@ type Student struct {
 	LastName  string             `bson:"lastName" json:"lastName"`
 	Rollno    int                `bson:"rollno" json:"rollno"`
 	Email     string             `bson:"email" json:"email"`
-	Class     string             `bson:"class" json:"class"`
+	ClassName string             `bson:"className" json:"className"`
 	Division  string             `bson:"division" json:"division"`
 }
 
@@ -21,7 +21,7 @@ type PostStudentParams struct {
 	LastName  string `json:"lastName"`
 	Rollno    int    `json:"rollno"`
 	Email     string `json:"email"`
-	Class     string `json:"class"`
+	ClassName string `json:"className"`
 	Division  string `json:"division"`
 }
 
@@ -39,8 +39,8 @@ func (params PostStudentParams) Validate() map[string]string {
 	if !isEmailValid(params.Email) {
 		errors["email"] = "email is invalid"
 	}
-	if len(params.Class) == 0 {
-		errors["class"] = "class is required"
+	if len(params.ClassName) < minClassName {
+		errors["className"] = "className is required"
 	}
 	if len(params.Division) == 0 {
 		errors["division"] = "division is required"
@@ -54,7 +54,7 @@ func NewStudentFromParams(params PostStudentParams) (*Student, error) {
 		LastName:  params.LastName,
 		Rollno:    params.Rollno,
 		Email:     params.Email,
-		Class:     params.Class,
+		ClassName: params.ClassName,
 		Division:  params.Division,
 	}, nil
 }
