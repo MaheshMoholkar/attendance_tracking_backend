@@ -40,16 +40,20 @@ func main() {
 		apiv1 = app.Group("/api/v1")
 
 		//initialize stores
-		userStore    = db.NewMongoUserStore(client)
-		studentStore = db.NewMongoStudentStore(client)
-		_            = &db.Store{
+		userStore       = db.NewMongoUserStore(client)
+		studentStore    = db.NewMongoStudentStore(client)
+		attendanceStore = db.NewMongoAttendanceStore(client)
+		collegeStore    = db.NewMongoCollegeStore(client)
+		_               = &db.Store{
 			UserStore: userStore,
 		}
 
 		// initialize handlers
-		authHandler    = api.NewAuthHandler(userStore)
-		userHandler    = api.NewUserHandler(userStore)
-		studentHandler = api.NewStudentHandler(studentStore)
+		authHandler       = api.NewAuthHandler(userStore)
+		userHandler       = api.NewUserHandler(userStore)
+		studentHandler    = api.NewStudentHandler(studentStore)
+		attendanceHandler = api.NewAttendanceHandler(attendanceStore)
+		collegeHandler    = api.NewCollegeHandler(collegeStore)
 	)
 
 	// allow cors
@@ -69,8 +73,16 @@ func main() {
 	app.Post("/api/auth/register", userHandler.HandleCreateUser)
 	app.Post("/api/auth/login", authHandler.HandleLogin)
 
+	// user handlers
+	apiv1.Get("/classes", collegeHandler.HandleGetClasses)
+
+	// student handlers
 	apiv1.Get("/students", studentHandler.HandleGetStudents)
 	apiv1.Post("/student", studentHandler.HandleCreateStudent)
+
+	// attendance handlers
+	apiv1.Get("/attendance", attendanceHandler.HandleGetAttendance)
+	apiv1.Post("/attendance", attendanceHandler.HandlePostAttendance)
 
 	app.Listen(*listenAddr)
 }
