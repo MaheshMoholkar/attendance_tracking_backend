@@ -1,17 +1,14 @@
 package main
 
 import (
-	"context"
-	"flag"
 	"log"
+	"os"
 
-	"github.com/MaheshMoholkar/attendance_tracking_backend/api"
-	"github.com/MaheshMoholkar/attendance_tracking_backend/api/middleware"
-	"github.com/MaheshMoholkar/attendance_tracking_backend/db"
+	"github.com/MaheshMoholkar/attendance_tracking_backend/internal/api"
+	"github.com/MaheshMoholkar/attendance_tracking_backend/internal/database"
+	"github.com/MaheshMoholkar/attendance_tracking_backend/internal/middleware"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var config = fiber.Config{
@@ -23,42 +20,26 @@ var config = fiber.Config{
 }
 
 func main() {
-	listenAddr := flag.String("listenAddr", ":5000", "The listen address of the api server")
-	flag.Parse()
+	listenAddr := os.Getenv("PORT")
 
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(db.DB_URI))
+	dbQueries, err := database.OpenDB()
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// Verify the connection
-	if err := client.Ping(context.TODO(), nil); err != nil {
-		log.Fatalf("Failed to ping MongoDB: %v", err)
-	}
+	store := database.New(dbQueries)
 
 	var (
 		app   = fiber.New(config)
 		apiv1 = app.Group("/api/v1")
 
-		//initialize stores
-		userStore       = db.NewMongoUserStore(client)
-		studentStore    = db.NewMongoStudentStore(client)
-		attendanceStore = db.NewMongoAttendanceStore(client)
-		collegeStore    = db.NewMongoCollegeStore(client)
-		store           = &db.Store{
-			StudentStore: studentStore,
-			CollegeStore: collegeStore,
-		}
-
-		// initialize handlers
-		authHandler       = api.NewAuthHandler(userStore)
-		userHandler       = api.NewUserHandler(userStore)
+		// Initialize handlers
+		authHandler       = api.NewAuthHandler(store)
 		studentHandler    = api.NewStudentHandler(store)
-		attendanceHandler = api.NewAttendanceHandler(attendanceStore)
-		collegeHandler    = api.NewCollegeHandler(collegeStore)
+		userHandler       = api.NewUserHandler(store)
+		attendanceHandler = api.NewAttendanceHandler(store)
 	)
 
-	// allow cors
+	// Allow CORS
 	app.Use(cors.New())
 
 	// Or customize the configuration
@@ -68,26 +49,21 @@ func main() {
 		AllowHeaders: "Origin, Content-Type, Accept",
 	}))
 
-	// middlewares
-	//apiv1.Use(middleware.VerifyToken())
+	// Middlewares
 	apiv1.Use(middleware.Logger)
 
-	// auth handlers
+	// Auth handlers
 	app.Post("/api/auth/register", userHandler.HandleCreateUser)
-	app.Post("/api/auth/login", authHandler.HandleLogin)
+	app.Post("/api/auth/login", authHandler.HandleUserLogin)
 
-	// user handlers
-	apiv1.Get("/class-info", collegeHandler.HandleGetClassInfo)
-	apiv1.Post("/class", collegeHandler.HandlePostClass)
-
-	// student handlers
+	// Student handlers
 	apiv1.Get("/students", studentHandler.HandleGetStudents)
 	apiv1.Post("/student", studentHandler.HandleCreateStudent)
-	apiv1.Delete("/student", studentHandler.HandleDeleteStudent)
+	apiv1.Put("/student", studentHandler.HandleUpdateStudent)
 
-	// attendance handlers
+	// Attendance handlers
 	apiv1.Get("/attendance", attendanceHandler.HandleGetAttendance)
 	apiv1.Post("/attendance", attendanceHandler.HandlePostAttendance)
 
-	app.Listen(*listenAddr)
+	app.Listen(listenAddr)
 }
