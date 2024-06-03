@@ -10,7 +10,7 @@ import (
 )
 
 type AuthParams struct {
-	StaffID  int    `json:"staffID"`
+	StaffID  int    `json:"staff_id"`
 	Password string `json:"password"`
 }
 

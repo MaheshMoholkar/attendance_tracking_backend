@@ -42,7 +42,7 @@ func main() {
 		// Initialize handlers
 		authHandler       = handlers.NewAuthHandler(store)
 		studentHandler    = handlers.NewStudentHandler(store)
-		userHandler       = handlers.NewUserHandler(store)
+		staffHandler      = handlers.NewStaffHandler(store)
 		attendanceHandler = handlers.NewAttendanceHandler(store)
 	)
 
@@ -57,10 +57,18 @@ func main() {
 	apiv1.Use(middleware.Logger)
 
 	// Auth handlers
-	app.Post("/api/auth/register", userHandler.HandleCreateStaff)
+	app.Post("/api/auth/register", staffHandler.HandleCreateStaff)
 	app.Post("/api/auth/login", authHandler.HandleUserLogin)
 
+	// Staff handlers
+	apiv1.Get("/staff", staffHandler.HandleGetStaff)
+	apiv1.Get("/staffs", staffHandler.HandleGetStaffs)
+	apiv1.Post("/staff", staffHandler.HandleCreateStaff)
+	apiv1.Put("/staff", staffHandler.HandleUpdateStaff)
+	apiv1.Delete("/staff", staffHandler.HandleDeleteStaff)
+
 	// Student handlers
+	apiv1.Get("/student", studentHandler.HandleGetStudent)
 	apiv1.Get("/students", studentHandler.HandleGetStudents)
 	apiv1.Post("/student", studentHandler.HandleCreateStudent)
 	apiv1.Put("/student", studentHandler.HandleUpdateStudent)
