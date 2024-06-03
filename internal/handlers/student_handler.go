@@ -1,4 +1,4 @@
-package api
+package handlers
 
 import (
 	"strconv"
@@ -29,8 +29,11 @@ func (h *StudentHandler) HandleGetStudents(ctx *fiber.Ctx) error {
 }
 
 func (h *StudentHandler) HandleCreateStudent(ctx *fiber.Ctx) error {
-	var params *types.Student
-	ctx.QueryParser(&params)
+	var params types.Student
+	err := ctx.BodyParser(&params)
+	if err != nil {
+		return err
+	}
 
 	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(strconv.Itoa(int(params.StudentID))), bcrypt.DefaultCost)
 	if err != nil {

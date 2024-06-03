@@ -1,4 +1,4 @@
-package api
+package handlers
 
 import (
 	"github.com/MaheshMoholkar/attendance_tracking_backend/internal/database"
@@ -6,17 +6,17 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-type UserHandler struct {
+type StaffHandler struct {
 	store *database.Store
 }
 
-func NewUserHandler(store *database.Store) *UserHandler {
-	return &UserHandler{
+func NewUserHandler(store *database.Store) *StaffHandler {
+	return &StaffHandler{
 		store: store,
 	}
 }
 
-func (h *UserHandler) HandleCreateUser(ctx *fiber.Ctx) error {
+func (h *StaffHandler) HandleCreateStaff(ctx *fiber.Ctx) error {
 	var params types.PostUserParams
 	if err := ctx.BodyParser(&params); err != nil {
 		return err
@@ -24,5 +24,6 @@ func (h *UserHandler) HandleCreateUser(ctx *fiber.Ctx) error {
 	if errors := params.Validate(); len(errors) > 0 {
 		return ctx.JSON(errors)
 	}
+
 	return nil
 }

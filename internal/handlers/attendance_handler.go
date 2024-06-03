@@ -1,4 +1,4 @@
-package api
+package handlers
 
 import (
 	"github.com/MaheshMoholkar/attendance_tracking_backend/internal/database"
