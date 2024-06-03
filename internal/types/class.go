@@ -2,27 +2,24 @@ package types
 
 import "github.com/MaheshMoholkar/attendance_tracking_backend/internal/database/postgres"
 
-type Class struct {
-	ClassID   int32  `json:"class_id"`
+type ClassInfo struct {
 	ClassName string `json:"className"`
 }
 
-func NewClass(params Class) *Class {
-	return &Class{
-		ClassID:   params.ClassID,
+func NewClass(params ClassInfo) *ClassInfo {
+	return &ClassInfo{
 		ClassName: params.ClassName,
 	}
 }
 
-func ParseClass(dbClass postgres.ClassInfo) Class {
-	return Class{
-		ClassID:   dbClass.ClassID,
+func ParseClass(dbClass postgres.ClassInfo) ClassInfo {
+	return ClassInfo{
 		ClassName: dbClass.Classname,
 	}
 }
 
-func ParseClasses(dbClasses []postgres.ClassInfo) []Class {
-	classes := make([]Class, len(dbClasses))
+func ParseClasses(dbClasses []postgres.ClassInfo) []ClassInfo {
+	classes := make([]ClassInfo, len(dbClasses))
 	for i, dbClass := range dbClasses {
 		classes[i] = ParseClass(dbClass)
 	}

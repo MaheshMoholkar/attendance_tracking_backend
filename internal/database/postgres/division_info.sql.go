@@ -9,6 +9,34 @@ import (
 	"context"
 )
 
+const createDivisionInfo = `-- name: CreateDivisionInfo :one
+INSERT INTO division_info (division_name, class_id) 
+VALUES ($1, $2) 
+RETURNING division_id, division_name, class_id
+`
+
+type CreateDivisionInfoParams struct {
+	DivisionName string
+	ClassID      int32
+}
+
+func (q *Queries) CreateDivisionInfo(ctx context.Context, arg CreateDivisionInfoParams) (DivisionInfo, error) {
+	row := q.db.QueryRowContext(ctx, createDivisionInfo, arg.DivisionName, arg.ClassID)
+	var i DivisionInfo
+	err := row.Scan(&i.DivisionID, &i.DivisionName, &i.ClassID)
+	return i, err
+}
+
+const deleteDivisionInfo = `-- name: DeleteDivisionInfo :exec
+DELETE FROM division_info 
+WHERE division_id = $1
+`
+
+func (q *Queries) DeleteDivisionInfo(ctx context.Context, divisionID int32) error {
+	_, err := q.db.ExecContext(ctx, deleteDivisionInfo, divisionID)
+	return err
+}
+
 const getDivisions = `-- name: GetDivisions :many
 SELECT division_id, division_name, class_id 
 FROM division_info
@@ -35,4 +63,24 @@ func (q *Queries) GetDivisions(ctx context.Context) ([]DivisionInfo, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateDivisionInfo = `-- name: UpdateDivisionInfo :one
+UPDATE division_info 
+SET division_name = $1, class_id = $2 
+WHERE division_id = $3 
+RETURNING division_id, division_name, class_id
+`
+
+type UpdateDivisionInfoParams struct {
+	DivisionName string
+	ClassID      int32
+	DivisionID   int32
+}
+
+func (q *Queries) UpdateDivisionInfo(ctx context.Context, arg UpdateDivisionInfoParams) (DivisionInfo, error) {
+	row := q.db.QueryRowContext(ctx, updateDivisionInfo, arg.DivisionName, arg.ClassID, arg.DivisionID)
+	var i DivisionInfo
+	err := row.Scan(&i.DivisionID, &i.DivisionName, &i.ClassID)
+	return i, err
 }
