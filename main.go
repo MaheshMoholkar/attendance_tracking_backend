@@ -63,7 +63,6 @@ func main() {
 	// Staff handlers
 	apiv1.Get("/staff", staffHandler.HandleGetStaff)
 	apiv1.Get("/staffs", staffHandler.HandleGetStaffs)
-	apiv1.Post("/staff", staffHandler.HandleCreateStaff)
 	apiv1.Put("/staff", staffHandler.HandleUpdateStaff)
 	apiv1.Delete("/staff", staffHandler.HandleDeleteStaff)
 

@@ -10,11 +10,12 @@ import (
 
 var SECRET = []byte("your-256-bit-secret")
 
-func GenerateJWT(id string) (string, error) {
+func GenerateJWT(id, role string) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
 	claims["authorized"] = true
 	claims["id"] = id
+	claims["role"] = role
 	tokenString, err := token.SignedString(SECRET)
 	if err != nil {
 		return "", err

@@ -53,6 +53,10 @@ func (h *StudentHandler) HandleCreateStudent(ctx *fiber.Ctx) error {
 		return err
 	}
 
+	if errors := params.Validate(); len(errors) > 0 {
+		return ctx.JSON(errors)
+	}
+
 	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(strconv.Itoa(int(params.StudentID))), bcrypt.DefaultCost)
 	if err != nil {
 		return err

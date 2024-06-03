@@ -10,8 +10,9 @@ import (
 )
 
 type AuthParams struct {
-	StaffID  int    `json:"staff_id"`
+	ID       int    `json:"id"`
 	Password string `json:"password"`
+	Role     string `json:"role"`
 }
 
 type AuthHandler struct {
@@ -26,21 +27,31 @@ func NewAuthHandler(store *database.Store) *AuthHandler {
 
 func (h *AuthHandler) HandleUserLogin(ctx *fiber.Ctx) error {
 	var params AuthParams
-	if err := ctx.BodyParser(&params); err != nil {
-		return err
-	}
-
-	passwordHash, err := h.store.DB.GetStaffCredentials(ctx.Context(), int32(params.StaffID))
+	err := ctx.BodyParser(&params)
 	if err != nil {
 		return err
 	}
 
+	var passwordHash string
+
+	if params.Role == "staff" {
+		passwordHash, err = h.store.DB.GetStaffCredentials(ctx.Context(), int32(params.ID))
+		if err != nil {
+			return err
+		}
+	} else {
+		passwordHash, err = h.store.DB.GetStudentCredentials(ctx.Context(), int32(params.ID))
+		if err != nil {
+			return err
+		}
+	}
 	err = bcrypt.CompareHashAndPassword([]byte(passwordHash), []byte(params.Password))
 	if err != nil {
 		return err
+
 	}
 
-	token, err := middleware.GenerateJWT(strconv.Itoa(params.StaffID))
+	token, err := middleware.GenerateJWT(strconv.Itoa(params.ID), params.Role)
 	if err != nil {
 		return err
 	}
