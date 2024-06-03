@@ -18,3 +18,7 @@ RETURNING staff_id;
 SELECT password_hash 
 FROM staff_credentials
 WHERE staff_id = $1;
+
+-- name: DeleteStaffCredentials :exec
+DELETE FROM staff_credentials
+WHERE staff_id = $1;

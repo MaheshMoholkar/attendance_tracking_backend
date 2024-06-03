@@ -4,6 +4,14 @@
 
 package postgres
 
+type Staff struct {
+	ID        int32
+	Firstname string
+	Lastname  string
+	Email     string
+	StaffID   int32
+}
+
 type StaffCredential struct {
 	StaffID      int32
 	PasswordHash string
