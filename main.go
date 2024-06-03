@@ -1,14 +1,17 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"log"
 	"os"
 
-	"github.com/MaheshMoholkar/attendance_tracking_backend/internal/api"
 	"github.com/MaheshMoholkar/attendance_tracking_backend/internal/database"
+	"github.com/MaheshMoholkar/attendance_tracking_backend/internal/handlers"
 	"github.com/MaheshMoholkar/attendance_tracking_backend/internal/middleware"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/joho/godotenv"
 )
 
 var config = fiber.Config{
@@ -20,7 +23,11 @@ var config = fiber.Config{
 }
 
 func main() {
-	listenAddr := os.Getenv("PORT")
+	godotenv.Load(".env")
+
+	address := fmt.Sprintf(":%s", os.Getenv("PORT"))
+	listenAddr := flag.String("listenAddr", address, "The listen address of the api server")
+	flag.Parse()
 
 	dbQueries, err := database.OpenDB()
 	if err != nil {
@@ -33,16 +40,13 @@ func main() {
 		apiv1 = app.Group("/api/v1")
 
 		// Initialize handlers
-		authHandler       = api.NewAuthHandler(store)
-		studentHandler    = api.NewStudentHandler(store)
-		userHandler       = api.NewUserHandler(store)
-		attendanceHandler = api.NewAttendanceHandler(store)
+		authHandler       = handlers.NewAuthHandler(store)
+		studentHandler    = handlers.NewStudentHandler(store)
+		userHandler       = handlers.NewUserHandler(store)
+		attendanceHandler = handlers.NewAttendanceHandler(store)
 	)
 
-	// Allow CORS
-	app.Use(cors.New())
-
-	// Or customize the configuration
+	// Customize the CORS configuration
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: "http://localhost:5173",
 		AllowMethods: "GET,POST,HEAD,PUT,DELETE",
@@ -53,7 +57,7 @@ func main() {
 	apiv1.Use(middleware.Logger)
 
 	// Auth handlers
-	app.Post("/api/auth/register", userHandler.HandleCreateUser)
+	app.Post("/api/auth/register", userHandler.HandleCreateStaff)
 	app.Post("/api/auth/login", authHandler.HandleUserLogin)
 
 	// Student handlers
@@ -65,5 +69,5 @@ func main() {
 	apiv1.Get("/attendance", attendanceHandler.HandleGetAttendance)
 	apiv1.Post("/attendance", attendanceHandler.HandlePostAttendance)
 
-	app.Listen(listenAddr)
+	app.Listen(*listenAddr)
 }
