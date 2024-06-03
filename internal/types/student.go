@@ -59,7 +59,7 @@ func NewStudent(params Student) *Student {
 	}
 }
 
-func ParseStudent(dbStudent postgres.Student) Student {
+func ParseStudent(dbStudent postgres.StudentInfo) Student {
 	return Student{
 		FirstName: dbStudent.Firstname,
 		LastName:  dbStudent.Lastname,
@@ -72,7 +72,7 @@ func ParseStudent(dbStudent postgres.Student) Student {
 	}
 }
 
-func ParseStudents(dbStudents []postgres.Student) []Student {
+func ParseStudents(dbStudents []postgres.StudentInfo) []Student {
 	students := []Student{}
 	for _, dbStudent := range dbStudents {
 		students = append(students, ParseStudent(dbStudent))

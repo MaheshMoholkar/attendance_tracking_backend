@@ -1,5 +1,5 @@
 -- name: CreateStudentInfo :one
-INSERT INTO students (
+INSERT INTO student_info (
     firstName,
     lastName,
     rollno,
@@ -14,15 +14,15 @@ RETURNING student_id;
 
 -- name: GetStudentInfo :one
 SELECT * 
-FROM students 
+FROM student_info 
 WHERE student_id = $1;
 
 -- name: GetStudentsInfo :many
 SELECT * 
-FROM students;
+FROM student_info;
 
 -- name: UpdateStudentInfo :one
-UPDATE students
+UPDATE student_info
 SET firstName = $2,
     lastName = $3,
     rollno = $4,
@@ -34,6 +34,6 @@ WHERE student_id = $1
 RETURNING student_id;
 
 -- name: DeleteStudentInfo :one
-DELETE FROM students
+DELETE FROM student_info
 WHERE student_id = $1
 RETURNING student_id;

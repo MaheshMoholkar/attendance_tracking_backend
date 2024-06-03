@@ -43,6 +43,7 @@ func main() {
 		authHandler       = handlers.NewAuthHandler(store)
 		studentHandler    = handlers.NewStudentHandler(store)
 		staffHandler      = handlers.NewStaffHandler(store)
+		classHandler      = handlers.NewClassHandler(store)
 		attendanceHandler = handlers.NewAttendanceHandler(store)
 	)
 
@@ -72,6 +73,9 @@ func main() {
 	apiv1.Post("/student", studentHandler.HandleCreateStudent)
 	apiv1.Put("/student", studentHandler.HandleUpdateStudent)
 	apiv1.Delete("/student", studentHandler.HandleDeleteStudent)
+
+	// Class handlers
+	apiv1.Get("/classes", classHandler.HandleGetClasses)
 
 	// Attendance handlers
 	apiv1.Get("/attendance", attendanceHandler.HandleGetAttendance)

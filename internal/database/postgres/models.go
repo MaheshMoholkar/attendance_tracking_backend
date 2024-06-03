@@ -4,12 +4,15 @@
 
 package postgres
 
-type Staff struct {
-	ID        int32
-	Firstname string
-	Lastname  string
-	Email     string
-	StaffID   int32
+type ClassInfo struct {
+	ClassID   int32
+	Classname string
+}
+
+type DivisionInfo struct {
+	DivisionID   int32
+	DivisionName string
+	ClassID      int32
 }
 
 type StaffCredential struct {
@@ -17,7 +20,20 @@ type StaffCredential struct {
 	PasswordHash string
 }
 
-type Student struct {
+type StaffInfo struct {
+	ID        int32
+	Firstname string
+	Lastname  string
+	Email     string
+	StaffID   int32
+}
+
+type StudentCredential struct {
+	StudentID    int32
+	PasswordHash string
+}
+
+type StudentInfo struct {
 	ID        int32
 	Firstname string
 	Lastname  string
@@ -27,9 +43,4 @@ type Student struct {
 	Division  string
 	Year      int32
 	StudentID int32
-}
-
-type StudentCredential struct {
-	StudentID    int32
-	PasswordHash string
 }

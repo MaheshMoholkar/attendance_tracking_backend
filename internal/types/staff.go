@@ -21,7 +21,7 @@ func NewStaff(params Staff) *Staff {
 	}
 }
 
-func ParseStaff(dbStaff postgres.Staff) Staff {
+func ParseStaff(dbStaff postgres.StaffInfo) Staff {
 	return Staff{
 		FirstName: dbStaff.Firstname,
 		LastName:  dbStaff.Lastname,
@@ -30,7 +30,7 @@ func ParseStaff(dbStaff postgres.Staff) Staff {
 	}
 }
 
-func ParseStaffs(dbStaffs []postgres.Staff) []Staff {
+func ParseStaffs(dbStaffs []postgres.StaffInfo) []Staff {
 	staffs := make([]Staff, len(dbStaffs))
 	for i, dbStaff := range dbStaffs {
 		staffs[i] = ParseStaff(dbStaff)

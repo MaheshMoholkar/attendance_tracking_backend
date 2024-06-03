@@ -1,5 +1,5 @@
 -- +goose Up
-CREATE TABLE students (
+CREATE TABLE student_info (
     id SERIAL PRIMARY KEY,
     firstName TEXT NOT NULL,
     lastName TEXT NOT NULL,

@@ -1,5 +1,5 @@
 -- +goose Up
-CREATE TABLE staff (
+CREATE TABLE staff_info (
     id SERIAL PRIMARY KEY,
     firstName TEXT NOT NULL,
     lastName TEXT NOT NULL,
