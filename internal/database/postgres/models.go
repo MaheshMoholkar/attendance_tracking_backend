@@ -11,7 +11,7 @@ type ClassInfo struct {
 
 type DivisionInfo struct {
 	DivisionID   int32
-	DivisionName string
+	Divisionname string
 	ClassID      int32
 }
 

@@ -10,20 +10,20 @@ import (
 )
 
 const createDivisionInfo = `-- name: CreateDivisionInfo :one
-INSERT INTO division_info (division_name, class_id) 
+INSERT INTO division_info (divisionName, class_id) 
 VALUES ($1, $2) 
-RETURNING division_id, division_name, class_id
+RETURNING division_id, divisionname, class_id
 `
 
 type CreateDivisionInfoParams struct {
-	DivisionName string
+	Divisionname string
 	ClassID      int32
 }
 
 func (q *Queries) CreateDivisionInfo(ctx context.Context, arg CreateDivisionInfoParams) (DivisionInfo, error) {
-	row := q.db.QueryRowContext(ctx, createDivisionInfo, arg.DivisionName, arg.ClassID)
+	row := q.db.QueryRowContext(ctx, createDivisionInfo, arg.Divisionname, arg.ClassID)
 	var i DivisionInfo
-	err := row.Scan(&i.DivisionID, &i.DivisionName, &i.ClassID)
+	err := row.Scan(&i.DivisionID, &i.Divisionname, &i.ClassID)
 	return i, err
 }
 
@@ -38,7 +38,7 @@ func (q *Queries) DeleteDivisionInfo(ctx context.Context, divisionID int32) erro
 }
 
 const getDivisions = `-- name: GetDivisions :many
-SELECT division_id, division_name, class_id 
+SELECT division_id, divisionname, class_id 
 FROM division_info
 `
 
@@ -51,7 +51,7 @@ func (q *Queries) GetDivisions(ctx context.Context) ([]DivisionInfo, error) {
 	var items []DivisionInfo
 	for rows.Next() {
 		var i DivisionInfo
-		if err := rows.Scan(&i.DivisionID, &i.DivisionName, &i.ClassID); err != nil {
+		if err := rows.Scan(&i.DivisionID, &i.Divisionname, &i.ClassID); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -67,20 +67,20 @@ func (q *Queries) GetDivisions(ctx context.Context) ([]DivisionInfo, error) {
 
 const updateDivisionInfo = `-- name: UpdateDivisionInfo :one
 UPDATE division_info 
-SET division_name = $1, class_id = $2 
+SET divisionName = $1, class_id = $2 
 WHERE division_id = $3 
-RETURNING division_id, division_name, class_id
+RETURNING division_id, divisionname, class_id
 `
 
 type UpdateDivisionInfoParams struct {
-	DivisionName string
+	Divisionname string
 	ClassID      int32
 	DivisionID   int32
 }
 
 func (q *Queries) UpdateDivisionInfo(ctx context.Context, arg UpdateDivisionInfoParams) (DivisionInfo, error) {
-	row := q.db.QueryRowContext(ctx, updateDivisionInfo, arg.DivisionName, arg.ClassID, arg.DivisionID)
+	row := q.db.QueryRowContext(ctx, updateDivisionInfo, arg.Divisionname, arg.ClassID, arg.DivisionID)
 	var i DivisionInfo
-	err := row.Scan(&i.DivisionID, &i.DivisionName, &i.ClassID)
+	err := row.Scan(&i.DivisionID, &i.Divisionname, &i.ClassID)
 	return i, err
 }

@@ -33,7 +33,7 @@ func (h *DivisionHandler) HandleCreateDivision(ctx *fiber.Ctx) error {
 		return err
 	}
 	_, err := h.store.DB.CreateDivisionInfo(ctx.Context(), postgres.CreateDivisionInfoParams{
-		DivisionName: division.DivisionName,
+		Divisionname: division.DivisionName,
 		ClassID:      division.ClassID,
 	})
 	if err != nil {

@@ -79,6 +79,7 @@ func main() {
 	apiv1.Get("/classes", classHandler.HandleGetClasses)
 	apiv1.Post("/class", classHandler.HandleCreateClass)
 	apiv1.Delete("/class", classHandler.HandleDeleteClass)
+	apiv1.Get("/class-divisions", classHandler.HandleGetClassDivisions)
 
 	// Division handlers
 	apiv1.Get("/divisions", divisionHandler.HandleGetDivisions)

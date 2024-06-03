@@ -12,14 +12,14 @@ import (
 const createClassInfo = `-- name: CreateClassInfo :one
 INSERT INTO class_info (className) 
 VALUES ($1) 
-RETURNING class_id, classname
+RETURNING class_id
 `
 
-func (q *Queries) CreateClassInfo(ctx context.Context, classname string) (ClassInfo, error) {
+func (q *Queries) CreateClassInfo(ctx context.Context, classname string) (int32, error) {
 	row := q.db.QueryRowContext(ctx, createClassInfo, classname)
-	var i ClassInfo
-	err := row.Scan(&i.ClassID, &i.Classname)
-	return i, err
+	var class_id int32
+	err := row.Scan(&class_id)
+	return class_id, err
 }
 
 const deleteClassInfo = `-- name: DeleteClassInfo :exec
@@ -30,6 +30,40 @@ WHERE class_id = $1
 func (q *Queries) DeleteClassInfo(ctx context.Context, classID int32) error {
 	_, err := q.db.ExecContext(ctx, deleteClassInfo, classID)
 	return err
+}
+
+const getClassDivisions = `-- name: GetClassDivisions :many
+SELECT c.className, d.divisionName 
+FROM class_info c
+JOIN division_info d ON c.class_id = d.class_id
+`
+
+type GetClassDivisionsRow struct {
+	Classname    string
+	Divisionname string
+}
+
+func (q *Queries) GetClassDivisions(ctx context.Context) ([]GetClassDivisionsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getClassDivisions)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetClassDivisionsRow
+	for rows.Next() {
+		var i GetClassDivisionsRow
+		if err := rows.Scan(&i.Classname, &i.Divisionname); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getClasses = `-- name: GetClasses :many
@@ -64,7 +98,7 @@ const updateClassInfo = `-- name: UpdateClassInfo :one
 UPDATE class_info 
 SET className = $1 
 WHERE class_id = $2 
-RETURNING class_id, classname
+RETURNING class_id
 `
 
 type UpdateClassInfoParams struct {
@@ -72,9 +106,9 @@ type UpdateClassInfoParams struct {
 	ClassID   int32
 }
 
-func (q *Queries) UpdateClassInfo(ctx context.Context, arg UpdateClassInfoParams) (ClassInfo, error) {
+func (q *Queries) UpdateClassInfo(ctx context.Context, arg UpdateClassInfoParams) (int32, error) {
 	row := q.db.QueryRowContext(ctx, updateClassInfo, arg.Classname, arg.ClassID)
-	var i ClassInfo
-	err := row.Scan(&i.ClassID, &i.Classname)
-	return i, err
+	var class_id int32
+	err := row.Scan(&class_id)
+	return class_id, err
 }

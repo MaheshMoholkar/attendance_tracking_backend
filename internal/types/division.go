@@ -16,7 +16,7 @@ func NewDivision(params Division) *Division {
 
 func ParseDivision(dbDivision postgres.DivisionInfo) Division {
 	return Division{
-		DivisionName: dbDivision.DivisionName,
+		DivisionName: dbDivision.Divisionname,
 		ClassID:      dbDivision.ClassID,
 	}
 }

@@ -16,3 +16,8 @@ RETURNING class_id;
 -- name: DeleteClassInfo :exec
 DELETE FROM class_info 
 WHERE class_id = $1;
+
+-- name: GetClassDivisions :many
+SELECT c.className, d.divisionName 
+FROM class_info c
+JOIN division_info d ON c.class_id = d.class_id;

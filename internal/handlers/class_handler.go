@@ -26,6 +26,15 @@ func (h *ClassHandler) HandleGetClasses(ctx *fiber.Ctx) error {
 	return ctx.JSON(classes)
 }
 
+func (h *ClassHandler) HandleGetClassDivisions(ctx *fiber.Ctx) error {
+	classDivisions, err := h.store.DB.GetClassDivisions(ctx.Context())
+	if err != nil {
+		return err
+	}
+	classDivisionMap := types.ParseClassDivisions(classDivisions)
+	return ctx.JSON(classDivisionMap)
+}
+
 func (h *ClassHandler) HandleCreateClass(ctx *fiber.Ctx) error {
 	var class types.ClassInfo
 	if err := ctx.BodyParser(&class); err != nil {

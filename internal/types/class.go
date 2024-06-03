@@ -25,3 +25,16 @@ func ParseClasses(dbClasses []postgres.ClassInfo) []ClassInfo {
 	}
 	return classes
 }
+
+type ClassDivision struct {
+	ClassName string   `json:"className"`
+	Divisions []string `json:"divisions"`
+}
+
+func ParseClassDivisions(dbClassDivisions []postgres.GetClassDivisionsRow) map[string][]string {
+	classDivisionMap := make(map[string][]string)
+	for _, cd := range dbClassDivisions {
+		classDivisionMap[cd.Classname] = append(classDivisionMap[cd.Classname], cd.Divisionname)
+	}
+	return classDivisionMap
+}
