@@ -51,6 +51,19 @@ func (q *Queries) CreateStudentInfo(ctx context.Context, arg CreateStudentInfoPa
 	return student_id, err
 }
 
+const deleteStudentInfo = `-- name: DeleteStudentInfo :one
+DELETE FROM students
+WHERE student_id = $1
+RETURNING student_id
+`
+
+func (q *Queries) DeleteStudentInfo(ctx context.Context, studentID int32) (int32, error) {
+	row := q.db.QueryRowContext(ctx, deleteStudentInfo, studentID)
+	var student_id int32
+	err := row.Scan(&student_id)
+	return student_id, err
+}
+
 const getStudentInfo = `-- name: GetStudentInfo :one
 SELECT id, firstname, lastname, rollno, email, classname, division, year, student_id 
 FROM students 
@@ -110,4 +123,44 @@ func (q *Queries) GetStudentsInfo(ctx context.Context) ([]Student, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateStudentInfo = `-- name: UpdateStudentInfo :one
+UPDATE students
+SET firstName = $2,
+    lastName = $3,
+    rollno = $4,
+    email = $5,
+    className = $6,
+    division = $7,
+    year = $8
+WHERE student_id = $1
+RETURNING student_id
+`
+
+type UpdateStudentInfoParams struct {
+	StudentID int32
+	Firstname string
+	Lastname  string
+	Rollno    int32
+	Email     string
+	Classname string
+	Division  string
+	Year      int32
+}
+
+func (q *Queries) UpdateStudentInfo(ctx context.Context, arg UpdateStudentInfoParams) (int32, error) {
+	row := q.db.QueryRowContext(ctx, updateStudentInfo,
+		arg.StudentID,
+		arg.Firstname,
+		arg.Lastname,
+		arg.Rollno,
+		arg.Email,
+		arg.Classname,
+		arg.Division,
+		arg.Year,
+	)
+	var student_id int32
+	err := row.Scan(&student_id)
+	return student_id, err
 }

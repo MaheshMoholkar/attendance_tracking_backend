@@ -14,7 +14,7 @@ type Student struct {
 	ClassName string `json:"className"`
 	Division  string `json:"division"`
 	Year      int32  `json:"year"`
-	StudentID int32  `json:"studentID"`
+	StudentID int32  `json:"student_id"`
 }
 
 func (params Student) Validate() map[string]string {
@@ -41,7 +41,7 @@ func (params Student) Validate() map[string]string {
 		errors["year"] = "year is required"
 	}
 	if params.Year == 0 {
-		errors["year"] = "studentID is required"
+		errors["student_id"] = "studentID is required"
 	}
 	return errors
 }
@@ -59,7 +59,7 @@ func NewStudent(params Student) *Student {
 	}
 }
 
-func parseStudent(dbStudent postgres.Student) Student {
+func ParseStudent(dbStudent postgres.Student) Student {
 	return Student{
 		FirstName: dbStudent.Firstname,
 		LastName:  dbStudent.Lastname,
@@ -72,10 +72,10 @@ func parseStudent(dbStudent postgres.Student) Student {
 	}
 }
 
-func parseStudents(dbStudents []postgres.Student) []Student {
+func ParseStudents(dbStudents []postgres.Student) []Student {
 	students := []Student{}
 	for _, dbStudent := range dbStudents {
-		students = append(students, parseStudent(dbStudent))
+		students = append(students, ParseStudent(dbStudent))
 	}
 	return students
 }

@@ -30,6 +30,16 @@ func (q *Queries) CreateStudentCredentials(ctx context.Context, arg CreateStuden
 	return student_id, err
 }
 
+const deleteStudentCredentials = `-- name: DeleteStudentCredentials :exec
+DELETE FROM student_credentials
+WHERE student_id = $1
+`
+
+func (q *Queries) DeleteStudentCredentials(ctx context.Context, studentID int32) error {
+	_, err := q.db.ExecContext(ctx, deleteStudentCredentials, studentID)
+	return err
+}
+
 const getStudentCredentials = `-- name: GetStudentCredentials :one
 SELECT password_hash
 FROM student_credentials

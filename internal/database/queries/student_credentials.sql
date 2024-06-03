@@ -18,3 +18,7 @@ RETURNING student_id;
 SELECT password_hash
 FROM student_credentials
 WHERE student_id = $1;
+
+-- name: DeleteStudentCredentials :exec
+DELETE FROM student_credentials
+WHERE student_id = $1;
