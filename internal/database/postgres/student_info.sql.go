@@ -51,17 +51,14 @@ func (q *Queries) CreateStudentInfo(ctx context.Context, arg CreateStudentInfoPa
 	return student_id, err
 }
 
-const deleteStudentInfo = `-- name: DeleteStudentInfo :one
+const deleteStudentInfo = `-- name: DeleteStudentInfo :exec
 DELETE FROM student_info
 WHERE student_id = $1
-RETURNING student_id
 `
 
-func (q *Queries) DeleteStudentInfo(ctx context.Context, studentID int32) (int32, error) {
-	row := q.db.QueryRowContext(ctx, deleteStudentInfo, studentID)
-	var student_id int32
-	err := row.Scan(&student_id)
-	return student_id, err
+func (q *Queries) DeleteStudentInfo(ctx context.Context, studentID int32) error {
+	_, err := q.db.ExecContext(ctx, deleteStudentInfo, studentID)
+	return err
 }
 
 const getStudentInfo = `-- name: GetStudentInfo :one
@@ -125,7 +122,7 @@ func (q *Queries) GetStudentsInfo(ctx context.Context) ([]StudentInfo, error) {
 	return items, nil
 }
 
-const updateStudentInfo = `-- name: UpdateStudentInfo :one
+const updateStudentInfo = `-- name: UpdateStudentInfo :exec
 UPDATE student_info
 SET firstName = $2,
     lastName = $3,
@@ -133,13 +130,13 @@ SET firstName = $2,
     email = $5,
     className = $6,
     division = $7,
-    year = $8
-WHERE student_id = $1
-RETURNING student_id
+    year = $8,
+    student_id = $9
+WHERE id = $1
 `
 
 type UpdateStudentInfoParams struct {
-	StudentID int32
+	ID        int32
 	Firstname string
 	Lastname  string
 	Rollno    int32
@@ -147,11 +144,12 @@ type UpdateStudentInfoParams struct {
 	Classname string
 	Division  string
 	Year      int32
+	StudentID int32
 }
 
-func (q *Queries) UpdateStudentInfo(ctx context.Context, arg UpdateStudentInfoParams) (int32, error) {
-	row := q.db.QueryRowContext(ctx, updateStudentInfo,
-		arg.StudentID,
+func (q *Queries) UpdateStudentInfo(ctx context.Context, arg UpdateStudentInfoParams) error {
+	_, err := q.db.ExecContext(ctx, updateStudentInfo,
+		arg.ID,
 		arg.Firstname,
 		arg.Lastname,
 		arg.Rollno,
@@ -159,8 +157,7 @@ func (q *Queries) UpdateStudentInfo(ctx context.Context, arg UpdateStudentInfoPa
 		arg.Classname,
 		arg.Division,
 		arg.Year,
+		arg.StudentID,
 	)
-	var student_id int32
-	err := row.Scan(&student_id)
-	return student_id, err
+	return err
 }

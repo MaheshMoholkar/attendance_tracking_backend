@@ -39,10 +39,13 @@ func (h *StudentHandler) HandleGetStudent(ctx *fiber.Ctx) error {
 }
 
 func (h *StudentHandler) HandleGetStudents(ctx *fiber.Ctx) error {
-	students, err := h.store.DB.GetStudentsInfo(ctx.Context())
+	var students []types.Student
+
+	dbStudents, err := h.store.DB.GetStudentsInfo(ctx.Context())
 	if err != nil {
 		return err
 	}
+	students = types.ParseStudents(dbStudents)
 	return ctx.JSON(students)
 }
 
@@ -95,7 +98,8 @@ func (h *StudentHandler) HandleUpdateStudent(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	_, err = h.store.DB.UpdateStudentInfo(ctx.Context(), postgres.UpdateStudentInfoParams{
+	err = h.store.DB.UpdateStudentInfo(ctx.Context(), postgres.UpdateStudentInfoParams{
+		ID:        params.ID,
 		Firstname: params.FirstName,
 		Lastname:  params.LastName,
 		Rollno:    int32(params.Rollno),
@@ -112,17 +116,17 @@ func (h *StudentHandler) HandleUpdateStudent(ctx *fiber.Ctx) error {
 }
 
 func (h *StudentHandler) HandleDeleteStudent(ctx *fiber.Ctx) error {
-	studentIDStr := ctx.Query("student_id")
-	if studentIDStr == "" {
+	IDStr := ctx.Query("student_id")
+	if IDStr == "" {
 		return fiber.NewError(fiber.StatusBadRequest, "student_id parameter is required")
 	}
 
-	studentID, err := strconv.Atoi(studentIDStr)
+	ID, err := strconv.Atoi(IDStr)
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "invalid student_id")
 	}
 
-	err = h.store.DB.DeleteStudentCredentials(ctx.Context(), int32(studentID))
+	err = h.store.DB.DeleteStudentCredentials(ctx.Context(), int32(ID))
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "invalid student_id")
 	}

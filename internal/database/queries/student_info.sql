@@ -21,7 +21,7 @@ WHERE student_id = $1;
 SELECT * 
 FROM student_info;
 
--- name: UpdateStudentInfo :one
+-- name: UpdateStudentInfo :exec
 UPDATE student_info
 SET firstName = $2,
     lastName = $3,
@@ -29,11 +29,10 @@ SET firstName = $2,
     email = $5,
     className = $6,
     division = $7,
-    year = $8
-WHERE student_id = $1
-RETURNING student_id;
+    year = $8,
+    student_id = $9
+WHERE id = $1;
 
--- name: DeleteStudentInfo :one
+-- name: DeleteStudentInfo :exec
 DELETE FROM student_info
-WHERE student_id = $1
-RETURNING student_id;
+WHERE student_id = $1;

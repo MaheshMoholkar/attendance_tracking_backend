@@ -31,10 +31,27 @@ type ClassDivision struct {
 	Divisions []string `json:"divisions"`
 }
 
-func ParseClassDivisions(dbClassDivisions []postgres.GetClassDivisionsRow) map[string][]string {
+type ClassDivisions struct {
+	ClassNames []string
+	Divisions  map[string][]string
+}
+
+func ParseClassDivisions(dbClassDivisions []postgres.GetClassDivisionsRow) ClassDivisions {
+	var classDivisions ClassDivisions
 	classDivisionMap := make(map[string][]string)
+	var classNames []string
+
 	for _, cd := range dbClassDivisions {
+		// Add classNames to the list
+		if _, exists := classDivisionMap[cd.Classname]; !exists {
+			classNames = append(classNames, cd.Classname)
+		}
 		classDivisionMap[cd.Classname] = append(classDivisionMap[cd.Classname], cd.Divisionname)
 	}
-	return classDivisionMap
+
+	classDivisions = ClassDivisions{
+		ClassNames: classNames,
+		Divisions:  classDivisionMap,
+	}
+	return classDivisions
 }

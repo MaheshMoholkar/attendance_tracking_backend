@@ -7,6 +7,7 @@ import (
 )
 
 type Student struct {
+	ID        int32  `json:"id"`
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
 	Rollno    int32  `json:"rollno"`
@@ -61,6 +62,7 @@ func NewStudent(params Student) *Student {
 
 func ParseStudent(dbStudent postgres.StudentInfo) Student {
 	return Student{
+		ID:        dbStudent.ID,
 		FirstName: dbStudent.Firstname,
 		LastName:  dbStudent.Lastname,
 		Rollno:    dbStudent.Rollno,
