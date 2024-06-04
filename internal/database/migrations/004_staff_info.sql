@@ -8,4 +8,4 @@ CREATE TABLE staff_info (
 );
 
 -- +goose Down
-DROP TABLE staff;
+DROP TABLE staff_info;

@@ -130,13 +130,12 @@ SET firstName = $2,
     email = $5,
     className = $6,
     division = $7,
-    year = $8,
-    student_id = $9
-WHERE id = $1
+    year = $8
+WHERE student_id = $1
 `
 
 type UpdateStudentInfoParams struct {
-	ID        int32
+	StudentID int32
 	Firstname string
 	Lastname  string
 	Rollno    int32
@@ -144,12 +143,11 @@ type UpdateStudentInfoParams struct {
 	Classname string
 	Division  string
 	Year      int32
-	StudentID int32
 }
 
 func (q *Queries) UpdateStudentInfo(ctx context.Context, arg UpdateStudentInfoParams) error {
 	_, err := q.db.ExecContext(ctx, updateStudentInfo,
-		arg.ID,
+		arg.StudentID,
 		arg.Firstname,
 		arg.Lastname,
 		arg.Rollno,
@@ -157,7 +155,6 @@ func (q *Queries) UpdateStudentInfo(ctx context.Context, arg UpdateStudentInfoPa
 		arg.Classname,
 		arg.Division,
 		arg.Year,
-		arg.StudentID,
 	)
 	return err
 }

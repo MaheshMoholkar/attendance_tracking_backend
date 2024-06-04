@@ -4,6 +4,19 @@
 
 package postgres
 
+import (
+	"time"
+)
+
+type AttendanceInfo struct {
+	AttendanceID int32
+	StudentID    int32
+	Date         time.Time
+	Status       bool
+	ClassID      int32
+	DivisionID   int32
+}
+
 type ClassInfo struct {
 	ClassID   int32
 	Classname string

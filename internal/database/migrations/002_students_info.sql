@@ -8,8 +8,9 @@ CREATE TABLE student_info (
     className TEXT NOT NULL,
     division TEXT NOT NULL,
     year INT NOT NULL,
-    student_id INT NOT NULL REFERENCES student_credentials(student_id) ON DELETE CASCADE
+    student_id INT NOT NULL REFERENCES student_credentials(student_id) ON DELETE CASCADE,
+    CONSTRAINT unique_student_id UNIQUE (student_id)
 );
 
 -- +goose Down
-DROP TABLE students;
+DROP TABLE student_info;

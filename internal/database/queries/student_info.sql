@@ -29,9 +29,8 @@ SET firstName = $2,
     email = $5,
     className = $6,
     division = $7,
-    year = $8,
-    student_id = $9
-WHERE id = $1;
+    year = $8
+WHERE student_id = $1;
 
 -- name: DeleteStudentInfo :exec
 DELETE FROM student_info
