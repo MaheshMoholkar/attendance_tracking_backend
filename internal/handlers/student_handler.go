@@ -99,7 +99,7 @@ func (h *StudentHandler) HandleUpdateStudent(ctx *fiber.Ctx) error {
 	}
 
 	err = h.store.DB.UpdateStudentInfo(ctx.Context(), postgres.UpdateStudentInfoParams{
-		ID:        params.ID,
+		StudentID: params.StudentID,
 		Firstname: params.FirstName,
 		Lastname:  params.LastName,
 		Rollno:    int32(params.Rollno),
@@ -107,7 +107,6 @@ func (h *StudentHandler) HandleUpdateStudent(ctx *fiber.Ctx) error {
 		Classname: params.ClassName,
 		Division:  params.Division,
 		Year:      int32(params.Year),
-		StudentID: int32(params.StudentID),
 	})
 	if err != nil {
 		return err

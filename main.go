@@ -87,8 +87,10 @@ func main() {
 	apiv1.Delete("/division", divisionHandler.HandleDeleteDivision)
 
 	// Attendance handlers
-	apiv1.Get("/attendance", attendanceHandler.HandleGetAttendance)
-	apiv1.Post("/attendance", attendanceHandler.HandlePostAttendance)
+
+	apiv1.Get("/attendance-list", attendanceHandler.HandleGetAttendanceList)
+	apiv1.Get("/attendance", attendanceHandler.HandleGetAttendanceByStudent)
+	apiv1.Post("/attendance", attendanceHandler.HandleInsertAttendance)
 
 	app.Listen(*listenAddr)
 }
