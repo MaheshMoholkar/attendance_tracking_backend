@@ -66,6 +66,19 @@ func (q *Queries) GetClassDivisions(ctx context.Context) ([]GetClassDivisionsRow
 	return items, nil
 }
 
+const getClassIDByName = `-- name: GetClassIDByName :one
+SELECT class_id 
+FROM class_info
+WHERE className = $1
+`
+
+func (q *Queries) GetClassIDByName(ctx context.Context, classname string) (int32, error) {
+	row := q.db.QueryRowContext(ctx, getClassIDByName, classname)
+	var class_id int32
+	err := row.Scan(&class_id)
+	return class_id, err
+}
+
 const getClasses = `-- name: GetClasses :many
 SELECT class_id, classname 
 FROM class_info

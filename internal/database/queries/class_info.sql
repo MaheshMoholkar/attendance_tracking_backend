@@ -7,6 +7,11 @@ RETURNING class_id;
 SELECT * 
 FROM class_info;
 
+-- name: GetClassIDByName :one
+SELECT class_id 
+FROM class_info
+WHERE className = $1;
+
 -- name: UpdateClassInfo :one
 UPDATE class_info 
 SET className = $1 

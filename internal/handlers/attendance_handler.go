@@ -28,8 +28,29 @@ func (h *AttendanceHandler) HandleInsertAttendance(c *fiber.Ctx) error {
 
 	for _, attendanceMap := range req.Data {
 		studentID := attendanceMap.StudentID
-		classID := attendanceMap.ClassID
-		divisionID := attendanceMap.DivisionID
+
+		// Fetch className and divisionName using student_id from student_info table
+		studentInfo, err := h.store.DB.GetStudentInfo(c.Context(), studentID)
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, "Failed to get student info")
+		}
+		className := studentInfo.Classname
+		divisionName := studentInfo.Division
+
+		// Get class_id from class_info table
+		classID, err := h.store.DB.GetClassIDByName(c.Context(), className)
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, "Failed to get class ID")
+		}
+
+		// Get division_id from division_info table using class_id
+		divisionID, err := h.store.DB.GetDivisionIDByNameAndClass(c.Context(), postgres.GetDivisionIDByNameAndClassParams{
+			Divisionname: divisionName,
+			ClassID:      classID,
+		})
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, "Failed to get division ID")
+		}
 
 		for day, status := range attendanceMap.Attendance {
 			dayInt, err := strconv.Atoi(day)
@@ -68,27 +89,46 @@ func (h *AttendanceHandler) HandleGetAttendanceByStudent(ctx *fiber.Ctx) error {
 }
 
 func (h *AttendanceHandler) HandleGetAttendanceList(ctx *fiber.Ctx) error {
-	classID, err := strconv.Atoi(ctx.Query("class_id"))
-	if err != nil {
-		return err
-	}
-	divisionID, err := strconv.Atoi(ctx.Query("division_id"))
-	if err != nil {
-		return err
-	}
-	dateStr := ctx.Query("date") // Format: YYYY-MM
+	className := ctx.Query("class_name")
+	divisionName := ctx.Query("division_name")
+	dateStr := ctx.Query("date")
+
+	// Parse the date
 	date, err := time.Parse("2006-01", dateStr)
 	if err != nil {
-		return err
+		return ctx.Status(fiber.StatusBadRequest).SendString("Invalid date format")
 	}
 
+	// Get class ID
+	classID, err := h.store.DB.GetClassIDByName(ctx.Context(), className)
+	if err != nil {
+		return ctx.Status(fiber.StatusNotFound).SendString("Class not found")
+	}
+
+	// Get division ID
+	divisionID, err := h.store.DB.GetDivisionIDByNameAndClass(ctx.Context(), postgres.GetDivisionIDByNameAndClassParams{
+		Divisionname: divisionName,
+		ClassID:      classID,
+	})
+	if err != nil {
+		return ctx.Status(fiber.StatusNotFound).SendString("Division not found")
+	}
+
+	// Get attendance
 	attendances, err := h.store.DB.GetAttendanceByClassDivisionAndMonthYear(ctx.Context(), postgres.GetAttendanceByClassDivisionAndMonthYearParams{
-		ClassID:    int32(classID),
-		DivisionID: int32(divisionID),
+		ClassID:    classID,
+		DivisionID: divisionID,
 		Date:       date,
 	})
 	if err != nil {
-		return err
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Error fetching attendance data")
 	}
-	return ctx.JSON(attendances)
+
+	// Convert postgres.AttendanceInfo to types.Attendance
+	convertedAttendances := types.ParseAttendances(attendances)
+
+	// Convert attendance data to the desired format
+	result := types.ConvertAttendanceData(convertedAttendances)
+
+	return ctx.JSON(result)
 }
