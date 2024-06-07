@@ -7,15 +7,15 @@ import (
 )
 
 type Student struct {
-	ID        int32  `json:"id"`
-	FirstName string `json:"firstName"`
-	LastName  string `json:"lastName"`
-	Rollno    int32  `json:"rollno"`
-	Email     string `json:"email"`
-	ClassName string `json:"className"`
-	Division  string `json:"division"`
-	Year      int32  `json:"year"`
-	StudentID int32  `json:"student_id"`
+	ID         int32  `json:"id"`
+	FirstName  string `json:"firstName"`
+	LastName   string `json:"lastName"`
+	Rollno     int32  `json:"rollno"`
+	Email      string `json:"email"`
+	ClassID    int32  `json:"class_id"`
+	DivisionID int32  `json:"division_id"`
+	Year       int32  `json:"year"`
+	StudentID  int32  `json:"student_id"`
 }
 
 func (params Student) Validate() map[string]string {
@@ -32,11 +32,11 @@ func (params Student) Validate() map[string]string {
 	if !isEmailValid(params.Email) {
 		errors["email"] = "email is invalid"
 	}
-	if len(params.ClassName) < minClassName {
-		errors["className"] = "className is required"
+	if params.ClassID == 0 {
+		errors["className"] = "class_id is required"
 	}
-	if len(params.Division) == 0 {
-		errors["division"] = "division is required"
+	if params.DivisionID == 0 {
+		errors["division"] = "division_id is required"
 	}
 	if params.Year == 0 {
 		errors["year"] = "year is required"
@@ -49,28 +49,28 @@ func (params Student) Validate() map[string]string {
 
 func NewStudent(params Student) *Student {
 	return &Student{
-		FirstName: params.FirstName,
-		LastName:  params.LastName,
-		Rollno:    params.Rollno,
-		Email:     params.Email,
-		ClassName: params.ClassName,
-		Division:  params.Division,
-		Year:      params.Year,
-		StudentID: params.StudentID,
+		FirstName:  params.FirstName,
+		LastName:   params.LastName,
+		Rollno:     params.Rollno,
+		Email:      params.Email,
+		ClassID:    params.ClassID,
+		DivisionID: params.DivisionID,
+		Year:       params.Year,
+		StudentID:  params.StudentID,
 	}
 }
 
 func ParseStudent(dbStudent postgres.StudentInfo) Student {
 	return Student{
-		ID:        dbStudent.ID,
-		FirstName: dbStudent.Firstname,
-		LastName:  dbStudent.Lastname,
-		Rollno:    dbStudent.Rollno,
-		Email:     dbStudent.Email,
-		ClassName: dbStudent.Classname,
-		Division:  dbStudent.Division,
-		Year:      dbStudent.Year,
-		StudentID: dbStudent.StudentID,
+		ID:         dbStudent.ID,
+		FirstName:  dbStudent.Firstname,
+		LastName:   dbStudent.Lastname,
+		Rollno:     dbStudent.Rollno,
+		Email:      dbStudent.Email,
+		ClassID:    dbStudent.ClassID,
+		DivisionID: dbStudent.DivisionID,
+		Year:       dbStudent.Year,
+		StudentID:  dbStudent.StudentID,
 	}
 }
 

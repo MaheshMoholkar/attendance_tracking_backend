@@ -4,12 +4,13 @@ INSERT INTO student_info (
     lastName,
     rollno,
     email,
-    className,
-    division,
+    class_id,
+    division_id,
+    academic_year,
     year,
     student_id
     )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 RETURNING student_id;
 
 -- name: GetStudentInfo :one
@@ -27,9 +28,10 @@ SET firstName = $2,
     lastName = $3,
     rollno = $4,
     email = $5,
-    className = $6,
-    division = $7,
-    year = $8
+    class_id = $6,
+    division_id = $7,
+    academic_year = $8,
+    year = $9
 WHERE student_id = $1;
 
 -- name: DeleteStudentInfo :exec

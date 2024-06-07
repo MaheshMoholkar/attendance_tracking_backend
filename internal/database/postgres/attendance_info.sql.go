@@ -7,107 +7,23 @@ package postgres
 
 import (
 	"context"
-	"time"
 )
 
-const getAttendanceByClassDivisionAndMonthYear = `-- name: GetAttendanceByClassDivisionAndMonthYear :many
-SELECT attendance_id, student_id, date, status, class_id, division_id FROM attendance_info
-WHERE class_id = $1 AND division_id = $2 AND DATE_TRUNC('month', date) = $3
-ORDER BY date DESC
+const fetchAttendanceTableName = `-- name: FetchAttendanceTableName :one
+SELECT attendance_table_name
+FROM attendance_info
+WHERE class_id = $1 AND division_id = $2 AND attendance_month_year = $3
 `
 
-type GetAttendanceByClassDivisionAndMonthYearParams struct {
-	ClassID    int32
-	DivisionID int32
-	Date       time.Time
+type FetchAttendanceTableNameParams struct {
+	ClassID             int32
+	DivisionID          int32
+	AttendanceMonthYear string
 }
 
-func (q *Queries) GetAttendanceByClassDivisionAndMonthYear(ctx context.Context, arg GetAttendanceByClassDivisionAndMonthYearParams) ([]AttendanceInfo, error) {
-	rows, err := q.db.QueryContext(ctx, getAttendanceByClassDivisionAndMonthYear, arg.ClassID, arg.DivisionID, arg.Date)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []AttendanceInfo
-	for rows.Next() {
-		var i AttendanceInfo
-		if err := rows.Scan(
-			&i.AttendanceID,
-			&i.StudentID,
-			&i.Date,
-			&i.Status,
-			&i.ClassID,
-			&i.DivisionID,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getAttendanceByStudent = `-- name: GetAttendanceByStudent :many
-SELECT attendance_id, student_id, date, status, class_id, division_id FROM attendance_info
-WHERE student_id = $1
-ORDER BY date DESC
-`
-
-func (q *Queries) GetAttendanceByStudent(ctx context.Context, studentID int32) ([]AttendanceInfo, error) {
-	rows, err := q.db.QueryContext(ctx, getAttendanceByStudent, studentID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []AttendanceInfo
-	for rows.Next() {
-		var i AttendanceInfo
-		if err := rows.Scan(
-			&i.AttendanceID,
-			&i.StudentID,
-			&i.Date,
-			&i.Status,
-			&i.ClassID,
-			&i.DivisionID,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const insertAttendance = `-- name: InsertAttendance :exec
-INSERT INTO attendance_info (student_id, date, status, class_id, division_id)
-VALUES ($1, $2, $3, $4, $5)
-`
-
-type InsertAttendanceParams struct {
-	StudentID  int32
-	Date       time.Time
-	Status     bool
-	ClassID    int32
-	DivisionID int32
-}
-
-func (q *Queries) InsertAttendance(ctx context.Context, arg InsertAttendanceParams) error {
-	_, err := q.db.ExecContext(ctx, insertAttendance,
-		arg.StudentID,
-		arg.Date,
-		arg.Status,
-		arg.ClassID,
-		arg.DivisionID,
-	)
-	return err
+func (q *Queries) FetchAttendanceTableName(ctx context.Context, arg FetchAttendanceTableNameParams) (string, error) {
+	row := q.db.QueryRowContext(ctx, fetchAttendanceTableName, arg.ClassID, arg.DivisionID, arg.AttendanceMonthYear)
+	var attendance_table_name string
+	err := row.Scan(&attendance_table_name)
+	return attendance_table_name, err
 }

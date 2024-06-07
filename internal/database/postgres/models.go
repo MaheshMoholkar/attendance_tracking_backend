@@ -4,17 +4,12 @@
 
 package postgres
 
-import (
-	"time"
-)
-
 type AttendanceInfo struct {
-	AttendanceID int32
-	StudentID    int32
-	Date         time.Time
-	Status       bool
-	ClassID      int32
-	DivisionID   int32
+	AttendanceID        int32
+	AttendanceTableName string
+	AttendanceMonthYear string
+	ClassID             int32
+	DivisionID          int32
 }
 
 type ClassInfo struct {
@@ -38,6 +33,7 @@ type StaffInfo struct {
 	Firstname string
 	Lastname  string
 	Email     string
+	ClassID   int32
 	StaffID   int32
 }
 
@@ -47,13 +43,14 @@ type StudentCredential struct {
 }
 
 type StudentInfo struct {
-	ID        int32
-	Firstname string
-	Lastname  string
-	Rollno    int32
-	Email     string
-	Classname string
-	Division  string
-	Year      int32
-	StudentID int32
+	ID           int32
+	Firstname    string
+	Lastname     string
+	Rollno       int32
+	Email        string
+	ClassID      int32
+	DivisionID   int32
+	AcademicYear int32
+	Year         int32
+	StudentID    int32
 }

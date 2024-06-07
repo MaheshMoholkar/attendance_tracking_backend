@@ -15,24 +15,26 @@ INSERT INTO student_info (
     lastName,
     rollno,
     email,
-    className,
-    division,
+    class_id,
+    division_id,
+    academic_year,
     year,
     student_id
     )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 RETURNING student_id
 `
 
 type CreateStudentInfoParams struct {
-	Firstname string
-	Lastname  string
-	Rollno    int32
-	Email     string
-	Classname string
-	Division  string
-	Year      int32
-	StudentID int32
+	Firstname    string
+	Lastname     string
+	Rollno       int32
+	Email        string
+	ClassID      int32
+	DivisionID   int32
+	AcademicYear int32
+	Year         int32
+	StudentID    int32
 }
 
 func (q *Queries) CreateStudentInfo(ctx context.Context, arg CreateStudentInfoParams) (int32, error) {
@@ -41,8 +43,9 @@ func (q *Queries) CreateStudentInfo(ctx context.Context, arg CreateStudentInfoPa
 		arg.Lastname,
 		arg.Rollno,
 		arg.Email,
-		arg.Classname,
-		arg.Division,
+		arg.ClassID,
+		arg.DivisionID,
+		arg.AcademicYear,
 		arg.Year,
 		arg.StudentID,
 	)
@@ -62,7 +65,7 @@ func (q *Queries) DeleteStudentInfo(ctx context.Context, studentID int32) error 
 }
 
 const getStudentInfo = `-- name: GetStudentInfo :one
-SELECT id, firstname, lastname, rollno, email, classname, division, year, student_id 
+SELECT id, firstname, lastname, rollno, email, class_id, division_id, academic_year, year, student_id 
 FROM student_info 
 WHERE student_id = $1
 `
@@ -76,8 +79,9 @@ func (q *Queries) GetStudentInfo(ctx context.Context, studentID int32) (StudentI
 		&i.Lastname,
 		&i.Rollno,
 		&i.Email,
-		&i.Classname,
-		&i.Division,
+		&i.ClassID,
+		&i.DivisionID,
+		&i.AcademicYear,
 		&i.Year,
 		&i.StudentID,
 	)
@@ -85,7 +89,7 @@ func (q *Queries) GetStudentInfo(ctx context.Context, studentID int32) (StudentI
 }
 
 const getStudentsInfo = `-- name: GetStudentsInfo :many
-SELECT id, firstname, lastname, rollno, email, classname, division, year, student_id 
+SELECT id, firstname, lastname, rollno, email, class_id, division_id, academic_year, year, student_id 
 FROM student_info
 `
 
@@ -104,8 +108,9 @@ func (q *Queries) GetStudentsInfo(ctx context.Context) ([]StudentInfo, error) {
 			&i.Lastname,
 			&i.Rollno,
 			&i.Email,
-			&i.Classname,
-			&i.Division,
+			&i.ClassID,
+			&i.DivisionID,
+			&i.AcademicYear,
 			&i.Year,
 			&i.StudentID,
 		); err != nil {
@@ -128,21 +133,23 @@ SET firstName = $2,
     lastName = $3,
     rollno = $4,
     email = $5,
-    className = $6,
-    division = $7,
-    year = $8
+    class_id = $6,
+    division_id = $7,
+    academic_year = $8,
+    year = $9
 WHERE student_id = $1
 `
 
 type UpdateStudentInfoParams struct {
-	StudentID int32
-	Firstname string
-	Lastname  string
-	Rollno    int32
-	Email     string
-	Classname string
-	Division  string
-	Year      int32
+	StudentID    int32
+	Firstname    string
+	Lastname     string
+	Rollno       int32
+	Email        string
+	ClassID      int32
+	DivisionID   int32
+	AcademicYear int32
+	Year         int32
 }
 
 func (q *Queries) UpdateStudentInfo(ctx context.Context, arg UpdateStudentInfoParams) error {
@@ -152,8 +159,9 @@ func (q *Queries) UpdateStudentInfo(ctx context.Context, arg UpdateStudentInfoPa
 		arg.Lastname,
 		arg.Rollno,
 		arg.Email,
-		arg.Classname,
-		arg.Division,
+		arg.ClassID,
+		arg.DivisionID,
+		arg.AcademicYear,
 		arg.Year,
 	)
 	return err

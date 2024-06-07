@@ -90,19 +90,20 @@ func SeedDivisions(store *database.Store) error {
 
 func SeedStudents(store *database.Store) error {
 	students := []struct {
-		FirstName string
-		LastName  string
-		RollNo    int32
-		Email     string
-		ClassName string
-		Division  string
-		Year      int32
-		StudentID int32
+		FirstName    string
+		LastName     string
+		RollNo       int32
+		Email        string
+		ClassID      int32
+		DivisionID   int32
+		AcademicYear int32
+		Year         int32
+		StudentID    int32
 	}{
-		{"Shubham", "Gaikwad", 360, "shubham@gmail.com", "mca", "a", 2023, 52453},
-		{"Mahesh", "Moholkar", 123, "mahesh@gmail.com", "mca", "b", 2023, 12345},
-		{"Tejas", "Asawale", 456, "tejas@gmail.com", "mca", "a", 2023, 67890},
-		{"Vaibhav", "Panchal", 789, "vaibhav@gmail.com", "mca", "b", 2023, 98765},
+		{"Shubham", "Gaikwad", 360, "shubham@gmail.com", 1, 1, 2023, 2, 52453},
+		{"Mahesh", "Moholkar", 123, "mahesh@gmail.com", 1, 2, 2023, 2, 12345},
+		{"Tejas", "Asawale", 456, "tejas@gmail.com", 1, 1, 2023, 2, 67890},
+		{"Vaibhav", "Panchal", 789, "vaibhav@gmail.com", 1, 2, 2023, 2, 98765},
 	}
 	for _, student := range students {
 		if _, err := store.DB.CreateStudentCredentials(context.Background(), postgres.CreateStudentCredentialsParams{
@@ -113,14 +114,14 @@ func SeedStudents(store *database.Store) error {
 		}
 
 		if _, err := store.DB.CreateStudentInfo(context.Background(), postgres.CreateStudentInfoParams{
-			Firstname: student.FirstName,
-			Lastname:  student.LastName,
-			Rollno:    student.RollNo,
-			Email:     student.Email,
-			Classname: student.ClassName,
-			Division:  student.Division,
-			Year:      student.Year,
-			StudentID: student.StudentID,
+			Firstname:  student.FirstName,
+			Lastname:   student.LastName,
+			Rollno:     student.RollNo,
+			Email:      student.Email,
+			ClassID:    student.ClassID,
+			DivisionID: student.DivisionID,
+			Year:       student.Year,
+			StudentID:  student.StudentID,
 		}); err != nil {
 			return fmt.Errorf("error creating student: %w", err)
 		}
@@ -135,11 +136,12 @@ func SeedStaff(store *database.Store) error {
 		FirstName string
 		LastName  string
 		Email     string
+		ClassID   int32
 		StaffID   int32
 		Password  string
 	}{
-		{"Shikha", "Dubey", "shikha@gmail.com", 1, "1"},
-		{"Swati", "Jadhav", "swati@gmail.com", 2, "2"},
+		{"Shikha", "Dubey", "shikha@gmail.com", 1, 1, "1"},
+		{"Swati", "Jadhav", "swati@gmail.com", 2, 2, "2"},
 	}
 	for _, s := range staff {
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(s.Password), bcrypt.DefaultCost)
@@ -158,6 +160,7 @@ func SeedStaff(store *database.Store) error {
 			Firstname: s.FirstName,
 			Lastname:  s.LastName,
 			Email:     s.Email,
+			ClassID:   s.ClassID,
 			StaffID:   s.StaffID,
 		}); err != nil {
 			return fmt.Errorf("error creating staff: %w", err)

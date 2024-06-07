@@ -88,9 +88,8 @@ func main() {
 
 	// Attendance handlers
 
-	apiv1.Get("/attendance-list", attendanceHandler.HandleGetAttendanceList)
-	apiv1.Get("/attendance", attendanceHandler.HandleGetAttendanceByStudent)
-	apiv1.Post("/attendance", attendanceHandler.HandleInsertAttendance)
+	apiv1.Get("/attendance", attendanceHandler.InitializeAttendanceTableHandler)
+	apiv1.Post("/attendance", attendanceHandler.UpdateAttendanceHandler)
 
 	app.Listen(*listenAddr)
 }

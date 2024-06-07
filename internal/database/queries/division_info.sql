@@ -7,11 +7,6 @@ INSERT INTO division_info (divisionName, class_id)
 VALUES ($1, $2) 
 RETURNING *;
 
--- name: GetDivisionIDByNameAndClass :one
-SELECT division_id 
-FROM division_info
-WHERE divisionName = $1 AND class_id = $2;
-
 -- name: UpdateDivisionInfo :one
 UPDATE division_info 
 SET divisionName = $1, class_id = $2 

@@ -14,9 +14,10 @@ INSERT INTO staff_info (
     firstName,
     lastName,
     email,
+    class_id,
     staff_id
 )
-VALUES ($1, $2, $3, $4)
+VALUES ($1, $2, $3, $4, $5)
 RETURNING id
 `
 
@@ -24,6 +25,7 @@ type CreateStaffInfoParams struct {
 	Firstname string
 	Lastname  string
 	Email     string
+	ClassID   int32
 	StaffID   int32
 }
 
@@ -32,6 +34,7 @@ func (q *Queries) CreateStaffInfo(ctx context.Context, arg CreateStaffInfoParams
 		arg.Firstname,
 		arg.Lastname,
 		arg.Email,
+		arg.ClassID,
 		arg.StaffID,
 	)
 	var id int32
@@ -53,7 +56,7 @@ func (q *Queries) DeleteStaffInfo(ctx context.Context, staffID int32) (int32, er
 }
 
 const getStaffInfo = `-- name: GetStaffInfo :one
-SELECT id, firstname, lastname, email, staff_id 
+SELECT id, firstname, lastname, email, class_id, staff_id 
 FROM staff_info 
 WHERE staff_id = $1
 `
@@ -66,13 +69,14 @@ func (q *Queries) GetStaffInfo(ctx context.Context, staffID int32) (StaffInfo, e
 		&i.Firstname,
 		&i.Lastname,
 		&i.Email,
+		&i.ClassID,
 		&i.StaffID,
 	)
 	return i, err
 }
 
 const getStaffsInfo = `-- name: GetStaffsInfo :many
-SELECT id, firstname, lastname, email, staff_id 
+SELECT id, firstname, lastname, email, class_id, staff_id 
 FROM staff_info
 `
 
@@ -90,6 +94,7 @@ func (q *Queries) GetStaffsInfo(ctx context.Context) ([]StaffInfo, error) {
 			&i.Firstname,
 			&i.Lastname,
 			&i.Email,
+			&i.ClassID,
 			&i.StaffID,
 		); err != nil {
 			return nil, err
@@ -109,7 +114,8 @@ const updateStaffInfo = `-- name: UpdateStaffInfo :one
 UPDATE staff_info
 SET firstName = $2,
     lastName = $3,
-    email = $4
+    email = $4,
+    class_id = $5
 WHERE staff_id = $1
 RETURNING id
 `
@@ -119,6 +125,7 @@ type UpdateStaffInfoParams struct {
 	Firstname string
 	Lastname  string
 	Email     string
+	ClassID   int32
 }
 
 func (q *Queries) UpdateStaffInfo(ctx context.Context, arg UpdateStaffInfoParams) (int32, error) {
@@ -127,6 +134,7 @@ func (q *Queries) UpdateStaffInfo(ctx context.Context, arg UpdateStaffInfoParams
 		arg.Firstname,
 		arg.Lastname,
 		arg.Email,
+		arg.ClassID,
 	)
 	var id int32
 	err := row.Scan(&id)

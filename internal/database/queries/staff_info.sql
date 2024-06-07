@@ -3,9 +3,10 @@ INSERT INTO staff_info (
     firstName,
     lastName,
     email,
+    class_id,
     staff_id
 )
-VALUES ($1, $2, $3, $4)
+VALUES ($1, $2, $3, $4, $5)
 RETURNING id;
 
 -- name: GetStaffInfo :one
@@ -21,7 +22,8 @@ FROM staff_info;
 UPDATE staff_info
 SET firstName = $2,
     lastName = $3,
-    email = $4
+    email = $4,
+    class_id = $5
 WHERE staff_id = $1
 RETURNING id;
 

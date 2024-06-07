@@ -76,14 +76,14 @@ func (h *StudentHandler) HandleCreateStudent(ctx *fiber.Ctx) error {
 	}
 
 	_, err = h.store.DB.CreateStudentInfo(ctx.Context(), postgres.CreateStudentInfoParams{
-		Firstname: params.FirstName,
-		Lastname:  params.LastName,
-		Rollno:    int32(params.Rollno),
-		Email:     params.Email,
-		Classname: params.ClassName,
-		Division:  params.Division,
-		Year:      int32(params.Year),
-		StudentID: int32(params.StudentID),
+		Firstname:  params.FirstName,
+		Lastname:   params.LastName,
+		Rollno:     int32(params.Rollno),
+		Email:      params.Email,
+		ClassID:    params.ClassID,
+		DivisionID: params.DivisionID,
+		Year:       int32(params.Year),
+		StudentID:  int32(params.StudentID),
 	})
 	if err != nil {
 		return err
@@ -99,14 +99,14 @@ func (h *StudentHandler) HandleUpdateStudent(ctx *fiber.Ctx) error {
 	}
 
 	err = h.store.DB.UpdateStudentInfo(ctx.Context(), postgres.UpdateStudentInfoParams{
-		StudentID: params.StudentID,
-		Firstname: params.FirstName,
-		Lastname:  params.LastName,
-		Rollno:    int32(params.Rollno),
-		Email:     params.Email,
-		Classname: params.ClassName,
-		Division:  params.Division,
-		Year:      int32(params.Year),
+		StudentID:  params.StudentID,
+		Firstname:  params.FirstName,
+		Lastname:   params.LastName,
+		Rollno:     int32(params.Rollno),
+		Email:      params.Email,
+		ClassID:    params.ClassID,
+		DivisionID: params.DivisionID,
+		Year:       int32(params.Year),
 	})
 	if err != nil {
 		return err
