@@ -4,14 +4,6 @@
 
 package postgres
 
-type AttendanceInfo struct {
-	AttendanceID        int32
-	AttendanceTableName string
-	AttendanceMonthYear string
-	ClassID             int32
-	DivisionID          int32
-}
-
 type ClassInfo struct {
 	ClassID   int32
 	Classname string

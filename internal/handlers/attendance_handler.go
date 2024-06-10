@@ -1,11 +1,11 @@
 package handlers
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	_ "github.com/lib/pq"
 
@@ -16,50 +16,55 @@ import (
 )
 
 type AttendanceHandler struct {
+	db    *sql.DB
 	store *database.Store
 }
 
 func NewAttendanceHandler(store *database.Store) *AttendanceHandler {
+	dbConn := os.Getenv("DB_URL")
+
+	conn, err := sql.Open("postgres", dbConn)
+	if err != nil {
+		panic(err)
+	}
 	return &AttendanceHandler{
+		db:    conn,
 		store: store,
 	}
 }
 
 func (h *AttendanceHandler) InitializeAttendanceTableHandler(ctx *fiber.Ctx) error {
-	classID := ctx.Params("class_id")
-	divisionID := ctx.Params("division_id")
-	monthYear := ctx.Params("month_year")
+	className := ctx.Query("class_name")
+	divisionName := ctx.Query("division_name")
+	subject := ctx.Query("subject")
+	monthYear := ctx.Query("month_year")
 
-	dbURL := fmt.Sprint(os.Getenv("DB_URL"))
-	db, err := sql.Open("postgres", dbURL)
+	classID, err := h.store.DB.GetClassIDByName(ctx.Context(), className)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	defer db.Close()
+	divisionID, err := h.store.DB.GetDivisionIDByName(ctx.Context(), postgres.GetDivisionIDByNameParams{
+		Divisionname: divisionName,
+		ClassID:      classID,
+	})
+	if err != nil {
+		return err
+	}
 
-	sqlQuery := fmt.Sprintf(`
-	DO $$
-	DECLARE
-		table_name TEXT := '%s' || '-' || '%s' || '-' || '%s';
-		day_count INT;
-		column_definitions TEXT;
-		student RECORD;
-	BEGIN
-		day_count := EXTRACT(DAY FROM DATE_TRUNC('MONTH', '%s'::DATE) + INTERVAL '1 MONTH' - INTERVAL '1 DAY');
-		SELECT string_agg('"' || generate_series(1, day_count)::TEXT || '" TEXT DEFAULT NULL', ', ') INTO column_definitions;
-		IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = table_name) THEN
-			EXECUTE 'CREATE TABLE ' || table_name || ' (student_id INT PRIMARY KEY, ' || column_definitions || ')';
-			FOR student IN SELECT student_id FROM student_info WHERE class_id = %s AND division_id = %s LOOP
-				EXECUTE 'INSERT INTO ' || table_name || ' (student_id) VALUES ($1)' USING student.student_id;
-			END LOOP;
-			INSERT INTO attendance_info (attendance_table_name, attendance_month_year, class_id, division_id) VALUES (table_name, '%s', %s, %s);
-		END IF;
-	END;
-	$$ LANGUAGE plpgsql;
-`, classID, divisionID, monthYear, monthYear, classID, divisionID, monthYear, classID, divisionID)
+	tableName := fmt.Sprintf("%s_%d_%d_%s", subject, classID, divisionID, monthYear)
 
-	// Execute the SQL query with the arguments
-	_, err = db.ExecContext(ctx.Context(), sqlQuery, classID, divisionID, monthYear)
+	// SQL statement to create the attendance table with a unique constraint
+	createTableStatement := fmt.Sprintf(`
+	CREATE TABLE IF NOT EXISTS %s (
+		id SERIAL PRIMARY KEY,
+		student_id INT NOT NULL,
+		attendance_date DATE NOT NULL,
+		attendance_status TEXT NOT NULL,
+		UNIQUE (student_id, attendance_date)
+	)
+	`, tableName)
+
+	_, err = h.db.Exec(createTableStatement)
 	if err != nil {
 		return err
 	}
@@ -67,61 +72,127 @@ func (h *AttendanceHandler) InitializeAttendanceTableHandler(ctx *fiber.Ctx) err
 	return ctx.SendStatus(fiber.StatusOK)
 }
 
-func (h *AttendanceHandler) UpdateAttendanceHandler(c *fiber.Ctx) error {
+func (h *AttendanceHandler) UpdateAttendanceHandler(ctx *fiber.Ctx) error {
 	var update types.AttendanceUpdate
-	if err := c.BodyParser(&update); err != nil {
-		return c.Status(fiber.StatusBadRequest).SendString("Invalid request payload")
+	if err := ctx.BodyParser(&update); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).SendString("Invalid request payload")
 	}
 
-	classID, err := c.ParamsInt("class_id")
+	className := update.ClassName
+	divisionName := update.DivisionName
+	subject := update.Subject
+	monthYear := update.MonthYear
+
+	classID, err := h.store.DB.GetClassIDByName(ctx.Context(), className)
 	if err != nil {
 		return err
 	}
-	divisionID, err := c.ParamsInt("division_id")
+	divisionID, err := h.store.DB.GetDivisionIDByName(ctx.Context(), postgres.GetDivisionIDByNameParams{
+		Divisionname: divisionName,
+		ClassID:      classID,
+	})
 	if err != nil {
 		return err
 	}
-	monthYear := c.Params("month_year")
 
-	dbURL := fmt.Sprintf(":%s", os.Getenv("DB_URL"))
-	db, err := sql.Open("postgres", dbURL)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-
-	tableName, err := h.fetchAttendanceTableName(context.Background(), int32(classID), int32(divisionID), monthYear)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).SendString("Could not fetch attendance table name")
+	tableName := fmt.Sprintf("%s_%d_%d_%s", subject, classID, divisionID, monthYear)
+	if len(tableName) == 0 {
+		return ctx.SendString("invalid table_name")
 	}
 
-	for day, status := range update.Attendance {
-		dayCol := fmt.Sprint(day)
-		sqlQuery := fmt.Sprintf(`
-			UPDATE %s 
-			SET %s = $1 
-			WHERE student_id = $2;
-			`, tableName, dayCol)
+	log.Print(tableName)
 
-		// Execute the SQL query with the arguments
-		_, err := db.ExecContext(c.Context(), sqlQuery, status, update.StudentID)
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).SendString("Could not update attendance")
+	// Insert attendance data
+	for _, studentAttendance := range update.RowData {
+		studentID := studentAttendance.StudentID
+		for day, status := range studentAttendance.Attendance {
+			attendanceDate := time.Date(time.Now().Year(), time.Now().Month(), day, 0, 0, 0, 0, time.UTC)
+			attendanceStatus := "absent"
+			if status {
+				attendanceStatus = "present"
+			}
+
+			insertQuery := fmt.Sprintf(`
+                INSERT INTO %s (student_id, attendance_date, attendance_status)
+                VALUES ($1, $2, $3)
+                ON CONFLICT (student_id, attendance_date) DO UPDATE SET attendance_status = EXCLUDED.attendance_status
+            `, tableName)
+
+			if _, err := h.db.Exec(insertQuery, studentID, attendanceDate, attendanceStatus); err != nil {
+				return ctx.Status(fiber.StatusInternalServerError).Send([]byte(err.Error()))
+			}
 		}
 	}
 
-	return c.SendString("Attendance updated successfully")
+	return ctx.SendString("Attendance updated successfully")
 }
 
-func (h *AttendanceHandler) fetchAttendanceTableName(ctx context.Context, classID, divisionID int32, monthYear string) (string, error) {
+func (h *AttendanceHandler) GetAttendanceHandler(ctx *fiber.Ctx) error {
+	className := ctx.Query("class_name")
+	divisionName := ctx.Query("division_name")
+	subject := ctx.Query("subject")
+	monthYear := ctx.Query("month_year")
 
-	result, err := h.store.DB.FetchAttendanceTableName(ctx, postgres.FetchAttendanceTableNameParams{
-		ClassID:             classID,
-		DivisionID:          divisionID,
-		AttendanceMonthYear: monthYear,
+	classID, err := h.store.DB.GetClassIDByName(ctx.Context(), className)
+	if err != nil {
+		return err
+	}
+	divisionID, err := h.store.DB.GetDivisionIDByName(ctx.Context(), postgres.GetDivisionIDByNameParams{
+		Divisionname: divisionName,
+		ClassID:      classID,
 	})
 	if err != nil {
-		return "", err
+		return err
 	}
-	return result, nil
+
+	tableName := fmt.Sprintf("%s_%d_%d_%s", subject, classID, divisionID, monthYear)
+
+	log.Print(tableName)
+	// SQL query to fetch attendance data
+	query := fmt.Sprintf(`
+        SELECT student_id, attendance_date, attendance_status
+        FROM %s
+    `, tableName)
+
+	rows, err := h.db.Query(query)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).Send([]byte(err.Error()))
+	}
+	defer rows.Close()
+
+	// Process the rows and organize data into the required format
+	attendanceData := make(map[int]map[int]bool)
+	for rows.Next() {
+		var studentID int
+		var attendanceDate time.Time
+		var attendanceStatus string
+		if err := rows.Scan(&studentID, &attendanceDate, &attendanceStatus); err != nil {
+			return ctx.Status(fiber.StatusInternalServerError).Send([]byte(err.Error()))
+		}
+
+		if _, exists := attendanceData[studentID]; !exists {
+			attendanceData[studentID] = make(map[int]bool)
+		}
+
+		day := attendanceDate.Day()
+		attendanceData[studentID][day] = attendanceStatus == "present"
+	}
+
+	if err := rows.Err(); err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).Send([]byte(err.Error()))
+	}
+
+	// Format the attendance data into the required JSON structure
+	var result []map[string]interface{}
+	for studentID, attendance := range attendanceData {
+		studentAttendance := map[string]interface{}{
+			"student_id": studentID,
+			"attendance": attendance,
+		}
+		result = append(result, studentAttendance)
+	}
+
+	return ctx.JSON(fiber.Map{
+		"data": result,
+	})
 }

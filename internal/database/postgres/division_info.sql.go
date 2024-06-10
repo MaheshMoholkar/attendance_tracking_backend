@@ -37,6 +37,24 @@ func (q *Queries) DeleteDivisionInfo(ctx context.Context, divisionID int32) erro
 	return err
 }
 
+const getDivisionIDByName = `-- name: GetDivisionIDByName :one
+SELECT division_id 
+FROM division_info
+WHERE divisionName = $1 AND class_id=$2
+`
+
+type GetDivisionIDByNameParams struct {
+	Divisionname string
+	ClassID      int32
+}
+
+func (q *Queries) GetDivisionIDByName(ctx context.Context, arg GetDivisionIDByNameParams) (int32, error) {
+	row := q.db.QueryRowContext(ctx, getDivisionIDByName, arg.Divisionname, arg.ClassID)
+	var division_id int32
+	err := row.Scan(&division_id)
+	return division_id, err
+}
+
 const getDivisions = `-- name: GetDivisions :many
 SELECT division_id, divisionname, class_id 
 FROM division_info
