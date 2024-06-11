@@ -46,3 +46,9 @@ type StudentInfo struct {
 	Year         int32
 	StudentID    int32
 }
+
+type SubjectInfo struct {
+	SubjectID   int32
+	Subjectname string
+	ClassID     int32
+}
