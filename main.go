@@ -46,6 +46,7 @@ func main() {
 		classHandler      = handlers.NewClassHandler(store)
 		divisionHandler   = handlers.NewDivisionHandler(store)
 		attendanceHandler = handlers.NewAttendanceHandler(store)
+		subjectHandler    = handlers.NewSubjectHandler(store)
 	)
 
 	// Customize the CORS configuration
@@ -87,10 +88,14 @@ func main() {
 	apiv1.Delete("/division", divisionHandler.HandleDeleteDivision)
 
 	// Attendance handlers
-
 	apiv1.Get("/attendance/create", attendanceHandler.InitializeAttendanceTableHandler)
 	apiv1.Get("/attendance", attendanceHandler.GetAttendanceHandler)
 	apiv1.Post("/attendance", attendanceHandler.UpdateAttendanceHandler)
+
+	// Subject handlers
+	apiv1.Get("/subject", subjectHandler.HangeGetSubjects)
+	apiv1.Post("/subject", subjectHandler.HandleCreateSubject)
+	apiv1.Delete("/subject", subjectHandler.HandleDeleteSubject)
 
 	app.Listen(*listenAddr)
 }

@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"strconv"
+
 	"github.com/MaheshMoholkar/attendance_tracking_backend/internal/database"
 	"github.com/MaheshMoholkar/attendance_tracking_backend/internal/database/postgres"
 	"github.com/MaheshMoholkar/attendance_tracking_backend/internal/types"
@@ -38,4 +40,21 @@ func (h *SubjectHandler) HandleCreateSubject(ctx *fiber.Ctx) error {
 		return err
 	}
 	return ctx.SendStatus(fiber.StatusCreated)
+}
+
+func (h *SubjectHandler) HandleDeleteSubject(ctx *fiber.Ctx) error {
+	id := ctx.Query("subject_id")
+	if id == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "subject_id is required")
+	}
+
+	subject_id, err := strconv.Atoi(id)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "invalid subject_id")
+	}
+	err = h.store.DB.DeleteSubjectInfo(ctx.Context(), int32(subject_id))
+	if err != nil {
+		return err
+	}
+	return ctx.SendStatus(fiber.StatusNoContent)
 }
